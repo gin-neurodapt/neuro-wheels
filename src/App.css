@@ -1,16 +1,23 @@
 .App {
+  font-family: "Tajawal", sans-serif;
+}
+
+
+.title {
+  padding: 20px 50px 50px 50px;
+  color: grey;
+  font-size: 32px;
+  padding-bottom: 0;
+  margin-bottom: -40px;
+  margin-top: 15px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.Wheel {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  transition: 2s ease-in-out;
 }
 
 .App-header {
@@ -24,15 +31,38 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.app-content {
+  transition: fadeIn 1.5s ease-in-out;
+  animation: fadeIn 1.5s ease-in-out;
 }
 
-@keyframes App-logo-spin {
+
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 431px) {
+  .App{
+    height: 105vh;
+  }
+}
+@media (max-width: 415px) {
+  .App{
+    height: 110vh;
+  }
+}
+@media (max-width: 391px) {
+  .App{
+    height: 112vh;
+  }
+}
+@media (max-width: 361px) {
+  .App{
+    height: 90vh;
   }
 }

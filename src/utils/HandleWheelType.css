@@ -1,0 +1,113 @@
+.btn-secondary {
+  border-radius: 2px;
+  background-color: transparent;
+  font-size: 19px;
+  color: #6b6b6b;
+  border: 0;
+  border-bottom: 1px solid white;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  --bs-btn-active-bg: white;
+  --bs-btn-active-color: #797979;
+  margin: 5px 15px;
+  padding-left: 0;
+  padding-right: 0;
+  font-family: "Tajawal", sans-serif;
+  letter-spacing: 2px;
+}
+.btn-secondary:hover {
+  background-color: transparent;
+  border-radius: 2px;
+  color: #797979;
+  border-bottom: 1px solid #b2b2b2;
+  line-height: 1.5;
+}
+.btn-secondary:focus {
+  color: #797979;
+  border-bottom: 1px solid #b2b2b2;
+}
+.btn-secondary:active {
+  color: #797979;
+  border-bottom: 1px solid #b2b2b2;
+}
+
+.wheel-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: absolute;
+  top: 200px;
+}
+@media (max-width: 1370px) {
+  .wheel-selection {
+    top: 140px;
+  }
+  .btn-secondary {
+    font-size: 17px;
+    margin: 1px 15px;
+  }
+}
+@media (max-width: 1367px) {
+  .wheel-selection {
+    top: 160px;
+  }
+  .btn-secondary {
+    font-size: 17px;
+    margin: 1px 15px;
+  }
+}
+@media (max-width: 1285px) {
+  .wheel-selection {
+    top: 130px;
+    margin: 5px 15px;
+  }
+  .btn-secondary {
+    font-size: 15px;
+    margin: 0px 15px;
+  }
+}
+@media (max-width: 1025px) {
+  .btn-secondary {
+    font-size: 18px;
+    margin: 0px 15px;
+  }
+  .wheel-selection {
+    top: 140px;
+  }
+}
+@media (max-width: 1025px) and (max-height: 770px) {
+  .btn-secondary {
+    font-size: 13px;
+    margin: 0px 10px;
+  }
+  .wheel-selection {
+    top: 110px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hidden {
+    visibility: hidden;
+  }
+  .reveal {
+    visibility: visible;
+  }
+  .wheel-selection {
+    background-color: rgba(255, 255, 255, 0.879);
+    align-items: flex-end;
+    top: 15%;
+    right: 20px;
+    padding: 10px;
+    border: 1px solid #b2b2b2b6;
+    border-radius: 4px;
+    z-index: 999;
+  }
+  .btn-secondary {
+    border-radius: 2px;
+    font-size: 14px;
+    color: #6b6b6b;
+    border: 0;
+    text-align: left;
+  }
+}

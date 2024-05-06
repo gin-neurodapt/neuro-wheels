@@ -1,0 +1,116 @@
+svg {
+  width: 50vw;
+  height: 50vh;
+  margin: auto;
+  position: absolute;
+  left: 25%;
+  top: 25%;
+}
+
+@media (max-width: 1370px) {
+  svg {
+    top: 30%;
+  }
+}
+@media (max-width: 1367px) {
+  svg {
+    width: 60vw;
+    height: 60vh;
+    left: 20%;
+    top: 25%;
+  }
+}
+@media (max-width: 1285px) {
+  svg {
+    width: 45vw;
+    height: 45vh;
+    left: 27.5%;
+    top: 33%;
+  }
+}
+@media (max-width: 1185px) {
+  svg {
+    width: 50vw;
+    height: 50vh;
+    left: 25%;
+    top: 33%;
+  }
+}
+@media (max-width: 1025px) {
+  svg {
+    width: 66vw;
+    height: 66vh;
+    left: 17%;
+    top: 20%;
+  }
+}
+@media (max-width: 1025px) and (max-height: 770px) {
+  svg {
+    width: 50vw;
+    height: 55vh;
+    left: 25%;
+    top: 30%;
+  }
+}
+@media (max-width: 915px) {
+  svg {
+    left: 16%;
+  }
+}
+@media (max-width: 825px) {
+  svg {
+    top: 23%;
+    width: 60vw;
+    height: 60vh;
+    left: 20%;
+  }
+}
+@media (max-width: 770px) {
+  svg {
+    top: 26%;
+    width: 55vw;
+    height: 55vh;
+    left: 22.5%;
+  }
+}
+@media (max-width: 725px) {
+  svg {
+    top: 35%;
+    width: 45vw;
+    height: 45vh;
+    left: 27.5%;
+  }
+}
+@media (max-width: 545px) {
+  svg {
+    top: 7%;
+    width: 90vw;
+    height: 90vh;
+    left: 5%;
+  }
+}
+@media (max-width: 435px) {
+  svg {
+    top: 7%;
+  }
+}
+
+@media (max-width: 415px) {
+  svg {
+    top: 5%;
+  }
+}
+@media (max-width: 395px) {
+  svg {
+    top: 6%;
+  }
+}
+
+@media (max-width: 380px) {
+  svg {
+    top: 13%;
+    width: 88vw;
+    height: 88vh;
+    left: 6%;
+  }
+}

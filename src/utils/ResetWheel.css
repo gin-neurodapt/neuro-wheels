@@ -1,0 +1,71 @@
+.reset-btn {
+  margin-right: 25px;
+  text-align: end;
+  display: flex;
+  justify-content: end;
+  position: absolute;
+  bottom: 12vh;
+  right: 0;
+  border-radius: 2px;
+}
+
+@media (max-width: 1025px) {
+  .reset-btn {
+    bottom: 10%;
+  }
+  .btn-light {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 725px) {
+  .reset-btn {
+    bottom: 20%;
+  }
+  .btn-light {
+    font-size: 13px;
+  }
+}
+@media (max-width: 545px) {
+  .reset-btn {
+    bottom: 1%;
+  }
+  .btn-light {
+    font-size: 13px;
+  }
+}
+@media (max-width: 435px) {
+  .reset-btn {
+    bottom: 10%;
+  }
+  .btn-light {
+    font-size: 16px;
+  }
+}
+@media (max-width: 415px) {
+  .reset-btn {
+    bottom: 15%;
+  }
+
+}
+@media (max-width: 400px) {
+  .reset-btn {
+    bottom: 2%;
+  }
+
+}
+@media (max-width: 395px) {
+  .reset-btn {
+    bottom: 12%;
+  }
+}
+@media (max-width: 376px) {
+  .reset-btn {
+    bottom: 0%;
+  }
+}
+@media (max-width: 345px) {
+  .reset-btn {
+    bottom: 8%;
+  }
+}
