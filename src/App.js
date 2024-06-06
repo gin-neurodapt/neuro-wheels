@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 import html2canvas from "html2canvas";
 
-import { WheelTypes } from "./types/wheelTypes";
+import { WheelTypes } from "./types/wheel.config";
 import { capitalizeFirstLetter } from "./utils/capitalise";
 
 import Wheel from "./wheel/Wheel";

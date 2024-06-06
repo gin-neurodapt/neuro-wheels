@@ -1,6 +1,6 @@
 import React from "react";
 import { WheelStructure, QuadrantPaths } from "../types/wheelStructure";
-import { WheelTypeColourOutline } from "../types/wheelValues";
+import { WheelTypeColourOutline } from "../types/branding.config";
 import "./WheelQuadrant.css";
 
 const Quadrant = ({ path, fill, onClick, wheelId }) => (

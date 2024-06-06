@@ -23,12 +23,16 @@ img {
   width: 160px;
 }
 @media (max-width: 1025px) {
-.title {
+  .title {
     font-size: 42px;
   }
 }
 
-
+@media (max-width: 1281px) {
+  .title {
+    font-size: 48px;
+  }
+}
 @media (max-width: 768px) {
   .navbar {
     max-height: 50px;

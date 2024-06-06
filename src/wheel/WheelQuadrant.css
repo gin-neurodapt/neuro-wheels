@@ -5,6 +5,7 @@ svg {
   position: absolute;
   left: 25%;
   top: 25%;
+  z-index: 10;
 }
 
 @media (max-width: 1370px) {
@@ -84,12 +85,17 @@ svg {
 @media (max-width: 545px) {
   svg {
     top: 7%;
-    width: 90vw;
-    height: 90vh;
+    width: 90%;
+    height: 90%;
     left: 5%;
   }
 }
 @media (max-width: 435px) {
+  svg {
+    top: 8.5%;
+  }
+}
+@media (max-width: 431px) {
   svg {
     top: 7%;
   }

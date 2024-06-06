@@ -1,5 +1,5 @@
 import React from "react";
-import { WheelTypes } from "../types/wheelTypes";
+import { WheelTypes } from "../types/wheel.config";
 import "./HandleWheelType.css";
 
 const HandleWheelType = ({

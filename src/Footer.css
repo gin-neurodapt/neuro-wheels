@@ -9,9 +9,15 @@ footer {
 
 .footer-title {
   text-align: center;
-  color: grey;
+  color: rgb(62, 62, 62);
   letter-spacing: 0.5px;
   line-height: 150%;
+}
+@media (max-width: 1281px) {
+  .footer-title {
+    line-height: 120%;
+    font-size: 13px;
+  }
 }
 @media (max-width: 1025px) and (max-height: 770px) {
   footer {

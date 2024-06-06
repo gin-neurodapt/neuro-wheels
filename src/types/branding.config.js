@@ -15,11 +15,3 @@ export const WheelTypeColourOutline = {
   4: "#118890",
 };
 
-export const Percentages = {
-  0: 0,
-  1: 20,
-  2: 40,
-  3: 60,
-  4: 80,
-  5: 100,
-};

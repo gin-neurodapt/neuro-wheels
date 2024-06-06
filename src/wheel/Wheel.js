@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./Wheel.css";
-import { QuadrantColors, Percentages } from "../types/wheelValues";
-import { WheelStructure } from "../types/wheelStructure";
-import { WheelTypes, SliceNames, WheelClassNames } from "../types/wheelTypes";
+import { QuadrantColors } from "../types/branding.config";
+import { WheelStructure, Percentages } from "../types/wheelStructure";
+import { WheelTypes, SliceNames, WheelClassNames } from "../types/wheel.config";
 
 import { WheelQuadrant } from "./WheelQuadrant";
 import HandleWheelType from "../utils/HandleWheelType";

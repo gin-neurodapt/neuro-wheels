@@ -2,14 +2,14 @@ export const WheelClassNames = {
   1: "life",
   2: "relationships",
   3: "business",
-  4: "self",
+  // 4: "self",
 };
 
 export const WheelTypes = {
   1: "Wheel of Life",
   2: "Wheel of Relationships",
   3: "Wheel of Business",
-  4: "Wheel of Know Thyself",
+  // 4: "Wheel of Know Thyself",
 };
 
 export const SliceNames = {

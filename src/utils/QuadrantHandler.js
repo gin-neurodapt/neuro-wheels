@@ -1,5 +1,5 @@
 import { QuadrantLevels, UpperQuadrantLevels } from "../types/wheelStructure";
-import { QuadrantColors } from "../types/wheelValues";
+import { QuadrantColors } from "../types/branding.config";
 
 export class QuadrantHandler {
   constructor(
