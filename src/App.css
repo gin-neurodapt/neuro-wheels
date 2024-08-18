@@ -2,7 +2,6 @@
   font-family: "Tajawal", sans-serif;
 }
 
-
 .title {
   padding: 20px 50px 50px 50px;
   color: grey;
@@ -36,7 +35,6 @@
   animation: fadeIn 1.5s ease-in-out;
 }
 
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -47,22 +45,22 @@
 }
 
 @media (max-width: 431px) {
-  .App{
+  .App {
     height: 105vh;
   }
 }
 @media (max-width: 415px) {
-  .App{
+  .App {
     height: 110vh;
   }
 }
 @media (max-width: 391px) {
-  .App{
+  .App {
     height: 112vh;
   }
 }
 @media (max-width: 361px) {
-  .App{
+  .App {
     height: 90vh;
   }
 }

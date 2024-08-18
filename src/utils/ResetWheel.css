@@ -29,7 +29,7 @@
 }
 @media (max-width: 545px) {
   .reset-btn {
-    bottom: 1%;
+    bottom: 7%;
   }
   .btn-light {
     font-size: 13px;
@@ -47,13 +47,11 @@
   .reset-btn {
     bottom: 15%;
   }
-
 }
 @media (max-width: 400px) {
   .reset-btn {
     bottom: 2%;
   }
-
 }
 @media (max-width: 395px) {
   .reset-btn {

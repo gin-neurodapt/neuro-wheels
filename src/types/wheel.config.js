@@ -49,7 +49,7 @@ export const SliceNames = {
     3: "Self Trust",
     4: "Integrity",
     5: "Vulnerability",
-    6: "Confidence",
+    6: "Self Awareness",
     7: "Authenticity",
     8: "Self Forgiveness",
   },
