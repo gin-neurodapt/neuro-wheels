@@ -1,5 +1,13 @@
 import { X_Y_POSITIONS } from "../types/wheel.structure.config";
 
+export const getScreenDimensions = () => {
+  const width = window.screen.width;
+  const height = window.visualViewport
+    ? window.visualViewport.height
+    : window.innerHeight;
+  return { width, height };
+};
+
 export const isMonitorScreen = (width) => width > 1600;
 export const isLaptopScreen = (width) => width > 1100;
 export const isTabletScreen = (width) => width <= 1024 && width > 600;

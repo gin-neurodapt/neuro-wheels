@@ -11,6 +11,7 @@ import {
   getWheelWidthUnits,
   getWheelPosition,
   getDiameter,
+  getScreenDimensions,
 } from "../utils/dimensions.js";
 
 const Quadrant = ({ path, fill, onClick, wheelId }) => (
@@ -24,17 +25,11 @@ export const QuadrantGenerator = ({
   wheelRef,
   setWheelTop,
 }) => {
-  const [screenSize, setScreenSize] = useState({
-    width: window.screen.width,
-    height: window.screen.height,
-  });
+  const [screenSize, setScreenSize] = useState(getScreenDimensions());
 
   useEffect(() => {
     const handleResize = () => {
-      setScreenSize({
-        width: window.screen.width,
-        height: window.screen.height,
-      });
+      setScreenSize(getScreenDimensions());
     };
 
     window.addEventListener("resize", handleResize);

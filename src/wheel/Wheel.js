@@ -20,6 +20,7 @@ import {
   isTabletScreen,
   getScreenType,
   getWheelTop,
+  getScreenDimensions,
 } from "../utils/dimensions";
 
 const Wheel = ({
@@ -33,19 +34,14 @@ const Wheel = ({
   const [sliceNames, setSelectedNames] = useState(SLICE_NAMES[1]);
   const [wheelId, setWheelId] = useState(1);
   const wheelRef = useRef(null);
-  const [screenSize, setScreenSize] = useState({
-    width: window.screen.width,
-    height: window.screen.height,
-  });
+  const [screenSize, setScreenSize] = useState(getScreenDimensions());
+
   const [screenType, setScreenType] = useState(getScreenType(screenSize));
   const [wheelTop, setWheelTop] = useState(getWheelTop(screenSize));
 
   useEffect(() => {
     const handleResize = () => {
-      const newScreenSize = {
-        width: window.screen.width,
-        height: window.screen.height,
-      };
+      const newScreenSize = getScreenDimensions();
       setScreenSize(newScreenSize);
       setScreenType(getScreenType(newScreenSize)); // Update screenType based on new screenSize
     };
