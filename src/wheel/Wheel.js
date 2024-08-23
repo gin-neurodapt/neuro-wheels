@@ -34,8 +34,8 @@ const Wheel = ({
   const [wheelId, setWheelId] = useState(1);
   const wheelRef = useRef(null);
   const [screenSize, setScreenSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: window.screen.width,
+    height: window.screen.height,
   });
   const [screenType, setScreenType] = useState(getScreenType(screenSize));
   const [wheelTop, setWheelTop] = useState(getWheelTop(screenSize));
@@ -43,8 +43,8 @@ const Wheel = ({
   useEffect(() => {
     const handleResize = () => {
       const newScreenSize = {
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: window.screen.width,
+        height: window.screen.height,
       };
       setScreenSize(newScreenSize);
       setScreenType(getScreenType(newScreenSize)); // Update screenType based on new screenSize

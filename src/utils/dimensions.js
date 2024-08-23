@@ -63,10 +63,20 @@ export const getScreenType = (screenSize) => {
     : "mobile";
 };
 
-const handleCoordinateAdjustments = (wheel, screenSize, index, screen) => {
+const handleCoordinateAdjustments = (
+  wheel,
+  screenSize,
+  index,
+  screen,
+  wheelTop
+) => {
   const coordinates = X_Y_POSITIONS[screen];
 
-  const { centerX, centerY } = calculateCenterCoordinates(screenSize, wheel);
+  const { centerX, centerY } = calculateCenterCoordinates(
+    screenSize,
+    wheel,
+    wheelTop
+  );
 
   const x = centerX + wheel.clientHeight * (coordinates?.x[index] || 0);
   const y = centerY + wheel.clientHeight * (1 - (coordinates?.y[index] || 0));
@@ -90,7 +100,7 @@ export const calculateCenterCoordinates = (screenSize, wheel, wheelTop) => {
   const wheelRadius = wheel.clientWidth / 2;
   return {
     centerX: (screenSize.width - wheel.clientHeight) / 2 + wheelRadius,
-    // centerY: wheelTop,
+    // centerY: screenSize.height - wheelTop + wheelRadius,
     centerY: (screenSize.height - wheel.clientHeight) / 2 + wheelRadius,
   };
 };
@@ -107,7 +117,8 @@ export const getTextPosition = (
     wheel,
     screenSize,
     index,
-    screenType
+    screenType,
+    wheelTop
   );
 
   const width = calculateTextWidth(isMonitor);

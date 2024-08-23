@@ -73,4 +73,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ### firebase deploy --project neuodapt-wheels
 
-https://firebase.google.com/docs/hosting/quickstart
+[https://firebase.google.com/docs/hosting/quickstart](https://firebase.google.com/docs/hosting/quickstart)

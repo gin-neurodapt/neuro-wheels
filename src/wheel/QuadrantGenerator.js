@@ -25,13 +25,16 @@ export const QuadrantGenerator = ({
   setWheelTop,
 }) => {
   const [screenSize, setScreenSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: window.screen.width,
+    height: window.screen.height,
   });
 
   useEffect(() => {
     const handleResize = () => {
-      setScreenSize({ width: window.innerWidth, height: window.innerHeight });
+      setScreenSize({
+        width: window.screen.width,
+        height: window.screen.height,
+      });
     };
 
     window.addEventListener("resize", handleResize);
