@@ -1,26 +1,26 @@
-export const WheelClassNames = {
+export const WHEEL_CLASS_NAMES = {
   1: "life",
-  2: "relationships",
-  3: "business",
+  // 2: "relationships",
+  // 3: "business",
   // 4: "self",
 };
 
-export const WheelTypes = {
+export const WHEEL_TYPES = {
   1: "Wheel of Life",
-  2: "Wheel of Relationships",
-  3: "Wheel of Business",
+  // 2: "Wheel of Relationships",
+  // 3: "Wheel of Business",
   // 4: "Wheel of Know Thyself",
 };
 
-export const SliceNames = {
+export const SLICE_NAMES = {
   1: {
     1: "Family",
-    2: "Intimate Relationship",
+    2: "Relationship",
     3: "Purpose",
-    4: "Personal Development",
+    4: "Personal Growth",
     5: "Career",
     6: "Finance",
-    7: "Leisure & Social Life",
+    7: "Social Life & Fun",
     8: "Health & Fitness",
   },
   2: {
@@ -43,14 +43,14 @@ export const SliceNames = {
     7: "Impact",
     8: "Innovation",
   },
-  4: {
-    1: "Self Acceptance",
-    2: "Independence",
-    3: "Self Trust",
-    4: "Integrity",
-    5: "Vulnerability",
-    6: "Self Awareness",
-    7: "Authenticity",
-    8: "Self Forgiveness",
-  },
+  // 4: {
+  //   1: "Self Acceptance",
+  //   2: "Independence",
+  //   3: "Self Trust",
+  //   4: "Integrity",
+  //   5: "Vulnerability",
+  //   6: "Self Awareness",
+  //   7: "Authenticity",
+  //   8: "Self Forgiveness",
+  // },
 };

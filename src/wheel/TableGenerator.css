@@ -1,0 +1,43 @@
+table {
+  width: 90%; /* Ensures the span takes full width of the parent th */
+  position: absolute;
+  left: 5%;
+  bottom: 140px;
+  border: none;
+  border-collapse: separate;
+  .icon-svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+.row-name {
+  font-size: 16px;
+}
+
+span {
+  margin-right: 40px;
+}
+
+tbody th {
+  padding: 10px 25px;
+  background-color: #f2f7fa;
+  border: none;
+  border-left: 1px solid;
+  border-right: 1px solid;
+}
+
+.table-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.percentage {
+  width: 40px;
+  font-weight: 900;
+}
+
+@media (max-width: 850px) {
+  table {
+    bottom: 110px;
+  }
+}

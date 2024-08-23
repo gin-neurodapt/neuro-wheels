@@ -12,22 +12,22 @@
 
 @media (max-width: 1025px) {
   .reset-btn {
-    bottom: 10%;
+    top: 15%;
   }
   .btn-light {
     font-size: 18px;
   }
 }
 
-@media (max-width: 725px) {
+@media (max-width: 770px) {
   .reset-btn {
-    bottom: 20%;
+    top: 9%;
   }
   .btn-light {
-    font-size: 13px;
+    font-size: 16px;
   }
 }
-@media (max-width: 545px) {
+/* @media (max-width: 545px) {
   .reset-btn {
     bottom: 7%;
   }
@@ -67,4 +67,4 @@
   .reset-btn {
     bottom: 8%;
   }
-}
+} */

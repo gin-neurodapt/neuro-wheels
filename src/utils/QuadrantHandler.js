@@ -1,5 +1,8 @@
-import { QuadrantLevels, UpperQuadrantLevels } from "../types/wheelStructure";
-import { QuadrantColors } from "../types/branding.config";
+import {
+  QUADRANT_LEVELS,
+  UPPER_QUADRANT_LEVELS,
+} from "../types/wheel.structure.config";
+import { QUADRANT_FILL } from "../types/branding.config";
 
 export class QuadrantHandler {
   constructor(
@@ -21,7 +24,7 @@ export class QuadrantHandler {
   isClickedLevelAlreadySelected() {
     return !!(
       this.fillColours[this.sliceId][this.levelId] ===
-      QuadrantColors.Selected[this.wheelId]
+      QUADRANT_FILL.Selected[this.wheelId]
     );
   }
 
@@ -61,24 +64,24 @@ export class QuadrantHandler {
 
   unselectLevel() {
     const sliceToUpdate = this.fillColours[this.sliceId];
-    QuadrantLevels[this.levelId].forEach((level) => {
-      sliceToUpdate[level] = QuadrantColors.Unselected;
+    QUADRANT_LEVELS[this.levelId].forEach((level) => {
+      sliceToUpdate[level] = QUADRANT_FILL.Unselected;
     });
     this.updateFillColours();
   }
 
   unselectUpperLevels() {
     const sliceToUpdate = this.fillColours[this.sliceId];
-    UpperQuadrantLevels[this.levelId].forEach((level) => {
-      sliceToUpdate[level] = QuadrantColors.Unselected;
+    UPPER_QUADRANT_LEVELS[this.levelId].forEach((level) => {
+      sliceToUpdate[level] = QUADRANT_FILL.Unselected;
     });
     this.updateFillColours();
   }
 
   selectLevels() {
     const sliceToUpdate = this.fillColours[this.sliceId];
-    QuadrantLevels[this.levelId].forEach((level) => {
-      sliceToUpdate[level] = QuadrantColors.Selected[this.wheelId];
+    QUADRANT_LEVELS[this.levelId].forEach((level) => {
+      sliceToUpdate[level] = QUADRANT_FILL.Selected[this.wheelId];
     });
     this.updateFillColours();
   }

@@ -2,19 +2,20 @@ import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 import html2canvas from "html2canvas";
 
-import { WheelTypes } from "./types/wheel.config";
-import { capitalizeFirstLetter } from "./utils/capitalise";
+import { WHEEL_TYPES } from "./types/wheel.type.config";
+import { capitalizeFirstLetter } from "./utils/textTransform";
 
 import Wheel from "./wheel/Wheel";
 import NavBar from "./NavBar";
 import Loading from "./loading/Loading";
-import Footer from './Footer'
+import Footer from "./Footer";
 
 const App = () => {
-  const [wheel, setWheel] = useState(WheelTypes[1]);
+  const [wheel, setWheel] = useState(WHEEL_TYPES[1]);
   const screenshotRef = useRef(null);
   const [customFileName, setCustomFileName] = useState();
   const [isLoading, setIsLoading] = useState(true);
+  const [isMenuActive, setIsMenuActive] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
@@ -48,13 +49,19 @@ const App = () => {
         ) : (
           <div className="app-content">
             <div ref={screenshotRef}>
-              <NavBar wheel={wheel}></NavBar>
+              <NavBar
+                wheel={wheel}
+                isMenuActive={isMenuActive}
+                setIsMenuActive={setIsMenuActive}
+              ></NavBar>
               <Wheel
                 wheel={wheel}
                 setWheel={setWheel}
                 handleDownload={handleDownload}
                 handleFileNameChange={handleFileNameChange}
                 customFileName={customFileName}
+                isMenuActive={isMenuActive}
+                setIsMenuActive={setIsMenuActive}
               ></Wheel>
             </div>
             <Footer></Footer>

@@ -1,12 +1,11 @@
 import React from "react";
-import { WheelTypes } from "../types/wheel.config";
+import { WHEEL_TYPES } from "../types/wheel.type.config";
 import "./HandleWheelType.css";
 
 const HandleWheelType = ({
   updateWheelSelection,
   isMenuActive,
   setIsMenuActive,
-  firstLoad,
 }) => {
   const renderWheelSelection = (id, wheel) => {
     const onClick = () => {
@@ -14,8 +13,8 @@ const HandleWheelType = ({
       setIsMenuActive(false);
     };
     return (
-      <div>
-        <button type="button" className={`btn btn-secondary`} onClick={onClick}>
+      <div key={id}>
+        <button type="button" className="btn btn-secondary" onClick={onClick}>
           {wheel}
         </button>
       </div>
@@ -29,7 +28,7 @@ const HandleWheelType = ({
   return (
     <div className={isMenuActive ? "reveal" : "hidden"}>
       <div className="wheel-selection">
-        {Object.entries(WheelTypes).map(([id, wheel]) =>
+        {Object.entries(WHEEL_TYPES).map(([id, wheel]) =>
           renderWheelSelection(JSON.parse(id), wheel)
         )}
       </div>

@@ -1,32 +1,89 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Wheel.css";
-import { QuadrantColors } from "../types/branding.config";
-import { WheelStructure, Percentages } from "../types/wheelStructure";
-import { WheelTypes, SliceNames, WheelClassNames } from "../types/wheel.config";
-
-import { WheelQuadrant } from "./WheelQuadrant";
-import HandleWheelType from "../utils/HandleWheelType";
+import { QUADRANT_FILL } from "../types/branding.config";
+import { WHEEL_STRUCTURE, PERCENTAGES } from "../types/wheel.structure.config";
+import {
+  WHEEL_TYPES,
+  WHEEL_CLASS_NAMES,
+  SLICE_NAMES,
+} from "../types/wheel.type.config";
 import { QuadrantHandler } from "../utils/QuadrantHandler";
+import { QuadrantGenerator } from "./QuadrantGenerator";
+import HandleWheelType from "../utils/HandleWheelType";
 import { Download } from "../utils/Download";
 import { ResetWheel } from "../utils/ResetWheel";
+import { abbreviate } from "../utils/textTransform";
+import { IconGenerator } from "./IconGenerator";
+import { TableGenerator } from "./TableGenerator";
+import {
+  getTextPosition,
+  isTabletScreen,
+  getScreenType,
+  getWheelTop,
+} from "../utils/dimensions";
 
 const Wheel = ({
   setWheel,
   handleDownload,
   handleFileNameChange,
   customFileName,
-  wheel,
+  isMenuActive,
+  setIsMenuActive,
 }) => {
-  const [sliceNames, setSelectedNames] = useState(SliceNames[1]);
+  const [sliceNames, setSelectedNames] = useState(SLICE_NAMES[1]);
   const [wheelId, setWheelId] = useState(1);
-  const [isMenuActive, setIsMenuActive] = useState(false);
+  const wheelRef = useRef(null);
+  const [screenSize, setScreenSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  const [screenType, setScreenType] = useState(getScreenType(screenSize));
+  const [wheelTop, setWheelTop] = useState(getWheelTop(screenSize));
+
+  useEffect(() => {
+    const handleResize = () => {
+      const newScreenSize = {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+      setScreenSize(newScreenSize);
+      setScreenType(getScreenType(newScreenSize)); // Update screenType based on new screenSize
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const positionTitles = () => {
+      const slices = document.querySelectorAll(".slices");
+      const wheel = wheelRef.current;
+
+      if (!wheel) return;
+
+      slices.forEach((slice, index) => {
+        const { left, width, top } = getTextPosition(
+          screenSize,
+          wheel,
+          index,
+          screenType,
+          wheelTop
+        );
+        slice.style.left = left;
+        slice.style.top = `${top}px`;
+        slice.style.position = "absolute";
+        slice.style.width = `${width}px`;
+      });
+    };
+
+    positionTitles();
+  }, [screenSize, screenType, wheelTop]); // Run positionTitles when screenSize or screenType changes
 
   const updateWheelSelection = (wheelId) => {
-    setSelectedNames(SliceNames[wheelId]);
+    setSelectedNames(SLICE_NAMES[wheelId]);
     setWheelId(wheelId);
-    setWheel(WheelTypes[wheelId]);
+    setWheel(WHEEL_TYPES[wheelId]);
   };
-  const percentages = Percentages;
 
   const resetWheel = () => {
     setFillColours((prevFillColours) => ({
@@ -53,13 +110,13 @@ const Wheel = ({
 
   const initFillColours = () => {
     const previousColoursByWheel = {};
-    Object.keys(WheelTypes).forEach((wheelId) => {
+    Object.keys(WHEEL_TYPES).forEach((wheelId) => {
       const wheel = {};
       const previousLevel = {};
-      WheelStructure.Slices.forEach((slice) => {
-        previousLevel[slice] = QuadrantColors.Unselected;
+      WHEEL_STRUCTURE.Slices.forEach((slice) => {
+        previousLevel[slice] = QUADRANT_FILL.Unselected;
       });
-      WheelStructure.Slices.forEach(
+      WHEEL_STRUCTURE.Slices.forEach(
         (slice) => (wheel[slice] = { ...previousLevel })
       );
       previousColoursByWheel[JSON.parse(wheelId)] = { ...wheel };
@@ -69,10 +126,10 @@ const Wheel = ({
 
   const initSlicePercentage = () => {
     const wheelPercentages = {};
-    Object.keys(WheelTypes).forEach((wheelId) => {
+    Object.keys(WHEEL_TYPES).forEach((wheelId) => {
       const slicePercentages = {};
-      WheelStructure.Slices.forEach(
-        (slice) => (slicePercentages[SliceNames[wheelId][slice]] = 0)
+      WHEEL_STRUCTURE.Slices.forEach(
+        (slice) => (slicePercentages[SLICE_NAMES[wheelId][slice]] = 0)
       );
       wheelPercentages[JSON.parse(wheelId)] = slicePercentages;
     });
@@ -81,9 +138,9 @@ const Wheel = ({
 
   const initPreviousLevel = () => {
     const previousLevelByWheel = {};
-    Object.keys(WheelTypes).forEach((wheelId) => {
+    Object.keys(WHEEL_TYPES).forEach((wheelId) => {
       const previousLevel = {};
-      WheelStructure.Slices.forEach((slice) => {
+      WHEEL_STRUCTURE.Slices.forEach((slice) => {
         previousLevel[slice] = null;
       });
       previousLevelByWheel[JSON.parse(wheelId)] = previousLevel;
@@ -104,12 +161,10 @@ const Wheel = ({
   useEffect(() => {
     setActiveSlicePercentages(slicePercentage[wheelId]);
     setActiveFillColours(fillColours[wheelId]);
-  }, [fillColours, slicePercentage, wheelId, activeFillColours]);
+  }, [fillColours, slicePercentage, wheelId]);
 
   const updateQuadrantColour = (sliceId, levelId) => {
-    // this handles the double click to reset a slice
-    const lastLevel = previousLevels[wheelId][sliceId];
-    const newLevel = lastLevel !== levelId ? levelId : 0;
+    const newLevel = previousLevels[wheelId][sliceId] !== levelId ? levelId : 0;
 
     const quadrantHandler = new QuadrantHandler(
       wheelId,
@@ -126,14 +181,14 @@ const Wheel = ({
       const updatedSlices = { ...prevSlices };
       updatedSlices[wheelId] = {
         ...prevSlices[wheelId],
-        [sliceNames[sliceId]]: percentages[newLevel],
+        [sliceNames[sliceId]]: PERCENTAGES[newLevel],
       };
       return updatedSlices;
     });
 
     setActiveSlicePercentages((prevSlicePercentage) => ({
       ...prevSlicePercentage,
-      [sliceNames[sliceId]]: percentages[newLevel],
+      [sliceNames[sliceId]]: PERCENTAGES[newLevel],
     }));
 
     setPreviousLevels((prevFillColours) => {
@@ -146,52 +201,56 @@ const Wheel = ({
     });
   };
 
-  const handleMenuDropdown = () => {
-    setIsMenuActive(!isMenuActive);
-  };
-
   return (
-    <body className="body">
-      <div className="responsive-title">
-        <h1>
-          {wheel}
-          <button className="btn btn-menu" onClick={handleMenuDropdown}>
-            <span className="material-symbols-outlined">expand_more</span>
-          </button>
-        </h1>
-      </div>
+    <div className="body">
       <HandleWheelType
         isMenuActive={isMenuActive}
         setIsMenuActive={setIsMenuActive}
         updateWheelSelection={updateWheelSelection}
-      ></HandleWheelType>
+      />
       <Download
         handleDownload={handleDownload}
         handleFileNameChange={handleFileNameChange}
         customFileName={customFileName}
-      ></Download>
-      <ResetWheel
-        resetWheel={resetWheel}
-        resetAllWheels={resetAllWheels}
-      ></ResetWheel>
-      {Object.entries(sliceNames).map(([key, slice]) => {
-        return (
-          <div className={`slices slice-title-${key}`}>
-            <div className={`slice-title`}>{slice}</div>
-            <div className={`slice-value ${WheelClassNames[wheelId]}`}>
+      />
+      <ResetWheel resetWheel={resetWheel} resetAllWheels={resetAllWheels} />
+      <div>
+        {Object.entries(sliceNames).map(([sliceId, slice]) => (
+          <div key={sliceId} className={`slices slice-title-${sliceId}`}>
+            <div className="icon-title">
+              <div
+                className={isTabletScreen(screenSize.width) ? "show" : "hide"}
+              >
+                <IconGenerator
+                  wheelId={wheelId}
+                  sliceId={sliceId}
+                ></IconGenerator>
+              </div>
+              <div className="slice-title">{abbreviate(slice, screenSize)}</div>
+            </div>
+            <div className={`slice-value ${WHEEL_CLASS_NAMES[wheelId]}`}>
               {activeSlicePercentages[slice]}%
             </div>
           </div>
-        );
-      })}
-      <div className="wheel-container">
-        <WheelQuadrant
-          fillColours={activeFillColours}
-          onQuadrantClick={updateQuadrantColour}
-          wheelId={wheelId}
-        />
+        ))}
+        <div className="wheel-container">
+          <QuadrantGenerator
+            wheelRef={wheelRef}
+            fillColours={activeFillColours}
+            onQuadrantClick={updateQuadrantColour}
+            wheelId={wheelId}
+            setWheelTop={setWheelTop}
+          />
+        </div>
+        <div className={isTabletScreen(screenSize.width) ? "show" : "hide"}>
+          <TableGenerator
+            sliceNames={sliceNames}
+            wheelId={wheelId}
+            activeSlicePercentages={activeSlicePercentages}
+          ></TableGenerator>
+        </div>
       </div>
-    </body>
+    </div>
   );
 };
 

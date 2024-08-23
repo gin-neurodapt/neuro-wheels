@@ -1,4 +1,4 @@
-export const QuadrantColors = {
+export const QUADRANT_FILL = {
   Unselected: "#ffffff",
   Selected: {
     1: "#B2E5DD",
@@ -8,10 +8,9 @@ export const QuadrantColors = {
   },
 };
 
-export const WheelTypeColourOutline = {
+export const WHEEL_STROKE = {
   1: "#177082",
   2: "#f67055",
   3: "#f68a55",
   4: "#118890",
 };
-
