@@ -1,7 +1,11 @@
 import React from "react";
 import "./Download.css";
 
-export const Download = ({ customFileName, handleDownload, handleFileNameChange }) => {
+export const Download = ({
+  customFileName,
+  handleDownload,
+  handleFileNameChange,
+}) => {
   return (
     <div className="download-content">
       <input
@@ -13,7 +17,7 @@ export const Download = ({ customFileName, handleDownload, handleFileNameChange 
       />
       <button
         type="button"
-        className="btn btn-light"
+        className="btn btn-light download-btn"
         title="download"
         onClick={handleDownload}
       >

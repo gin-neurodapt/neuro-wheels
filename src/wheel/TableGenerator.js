@@ -31,13 +31,13 @@ export const TableGenerator = ({
                 >
                   <div className="table-row">
                     <div>
-                      <span>
+                      <span className="row">
                         <IconGenerator
                           wheelId={wheelId}
                           sliceId={sliceIdMap[slice]}
                         ></IconGenerator>
                       </span>
-                      <span className="row-name">{slice}</span>
+                      <span className="row row-name">{slice}</span>
                     </div>
                     <strong
                       className="percentage"

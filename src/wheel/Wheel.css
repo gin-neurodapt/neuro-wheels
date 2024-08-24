@@ -71,6 +71,12 @@
 .btn-txt {
   padding: 7px 30px;
 }
+.slice-title {
+  font-size: 14px;
+}
+.slice-value {
+  font-size: 24px;
+}
 @media (min-width: 1600px) {
   .slice-title {
     font-size: 16px;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   WHEEL_STRUCTURE,
   QUADRANT_PATHS,
@@ -6,13 +6,7 @@ import {
 import { WHEEL_STROKE } from "../types/branding.config";
 import "./QuadrantGenerator.css";
 
-import {
-  getWheelDimensions,
-  getWheelWidthUnits,
-  getWheelPosition,
-  getDiameter,
-  getScreenDimensions,
-} from "../utils/dimensions.js";
+import { getWheelWidthUnits, isTabletScreen } from "../utils/dimensions.js";
 
 const Quadrant = ({ path, fill, onClick, wheelId }) => (
   <path d={path} stroke={WHEEL_STROKE[wheelId]} fill={fill} onClick={onClick} />
@@ -23,38 +17,31 @@ export const QuadrantGenerator = ({
   fillColours,
   wheelId,
   wheelRef,
-  setWheelTop,
+  screenSize,
+  wheelSize,
 }) => {
-  const [screenSize, setScreenSize] = useState(getScreenDimensions());
-
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenSize(getScreenDimensions());
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []); // Empty dependency array to run this effect only once on mount
-
   useEffect(() => {
     const positionWheel = () => {
       const wheel = wheelRef.current;
       if (!wheel) return;
+      const isTablet = isTabletScreen(screenSize.width);
 
-      const diameter = getDiameter(screenSize);
-      const { width, height } = getWheelDimensions(screenSize, diameter);
-      const { left, top } = getWheelPosition(screenSize, width);
-      setWheelTop(top);
       wheel.style.position = "absolute";
-      wheel.style.width = getWheelWidthUnits(screenSize, width);
-      wheel.style.height = `${height}px`;
-      wheel.style.left = left;
-      wheel.style.top = top;
+      wheel.style.width = getWheelWidthUnits(screenSize, wheelSize.wheelWidth);
+      wheel.style.height = `${wheelSize.wheelHeight}px`;
+      wheel.style.left = `${wheelSize.wheelLeft}${isTablet ? "px" : "vw"}`;
+      wheel.style.top = `${wheelSize.wheelTop}px`;
     };
 
     positionWheel();
-  }, [screenSize, setWheelTop, wheelRef]); // Only run this effect when screenSize or wheelRef changes
+  }, [
+    screenSize,
+    wheelRef,
+    wheelSize.wheelHeight,
+    wheelSize.wheelLeft,
+    wheelSize.wheelTop,
+    wheelSize.wheelWidth,
+  ]); // Only run this effect when screenSize or wheelRef changes
 
   const renderQuadrant = (sliceId, levelId) => {
     const path = QUADRANT_PATHS[sliceId][levelId];

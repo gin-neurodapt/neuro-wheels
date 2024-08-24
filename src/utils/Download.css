@@ -7,14 +7,16 @@
 
 .btn-light {
   margin: 0px 5px;
-  font-weight: 400;
   padding: 5px 20px;
   color: #292929;
   text-transform: lowercase;
-  font-size: 17px;
+  font-size: 14px;
   letter-spacing: 1px;
   max-height: 40px;
   min-width: fit-content;
+}
+button .download-btn {
+  width: 20px;
 }
 
 .material-symbols-outlined {

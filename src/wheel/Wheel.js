@@ -19,8 +19,9 @@ import {
   getTextPosition,
   isTabletScreen,
   getScreenType,
-  getWheelTop,
   getScreenDimensions,
+  getWheelPosition,
+  getWheelWidthUnits,
 } from "../utils/dimensions";
 
 const Wheel = ({
@@ -35,15 +36,16 @@ const Wheel = ({
   const [wheelId, setWheelId] = useState(1);
   const wheelRef = useRef(null);
   const [screenSize, setScreenSize] = useState(getScreenDimensions());
+  const [wheelSize, setWheelSize] = useState(getWheelPosition(screenSize));
 
   const [screenType, setScreenType] = useState(getScreenType(screenSize));
-  const [wheelTop, setWheelTop] = useState(getWheelTop(screenSize));
 
   useEffect(() => {
     const handleResize = () => {
       const newScreenSize = getScreenDimensions();
       setScreenSize(newScreenSize);
       setScreenType(getScreenType(newScreenSize)); // Update screenType based on new screenSize
+      setWheelSize(getWheelPosition(newScreenSize));
     };
 
     window.addEventListener("resize", handleResize);
@@ -60,12 +62,11 @@ const Wheel = ({
       slices.forEach((slice, index) => {
         const { left, width, top } = getTextPosition(
           screenSize,
-          wheel,
           index,
-          screenType,
-          wheelTop
+          wheelSize,
+          screenType
         );
-        slice.style.left = left;
+        slice.style.left = getWheelWidthUnits(screenSize, left);
         slice.style.top = `${top}px`;
         slice.style.position = "absolute";
         slice.style.width = `${width}px`;
@@ -73,7 +74,7 @@ const Wheel = ({
     };
 
     positionTitles();
-  }, [screenSize, screenType, wheelTop]); // Run positionTitles when screenSize or screenType changes
+  }, [screenSize, screenType, wheelSize]); // Run positionTitles when screenSize or screenType changes
 
   const updateWheelSelection = (wheelId) => {
     setSelectedNames(SLICE_NAMES[wheelId]);
@@ -235,7 +236,9 @@ const Wheel = ({
             fillColours={activeFillColours}
             onQuadrantClick={updateQuadrantColour}
             wheelId={wheelId}
-            setWheelTop={setWheelTop}
+            setWheelSize={setWheelSize}
+            wheelSize={wheelSize}
+            screenSize={screenSize}
           />
         </div>
         <div className={isTabletScreen(screenSize.width) ? "show" : "hide"}>
