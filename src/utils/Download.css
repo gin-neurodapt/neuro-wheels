@@ -32,8 +32,8 @@ input {
     margin-top: 5px;
   }
 }
-@media (max-width: 768px) {
+@media (max-width: 850px) {
   .download-content {
-    visibility: hidden;
+    display: none;
   }
 }

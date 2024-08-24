@@ -35,9 +35,9 @@ export const getWheelTop = (screenSize, wheelHeight) => {
 
   return isMonitorScreen(screenSize.width)
     ? screenSize.height * 0.225
-    : // : isTablet
-      // ? screenSize.height / 4
-      (screenSize.height - wheelHeight) / 2.75;
+    : isTablet
+    ? screenSize.height / 4
+    : (screenSize.height - wheelHeight) / 2.75;
 };
 
 export const getWheelDimensions = (screenSize, diameter) => {

@@ -2,7 +2,7 @@ table {
   width: 90%; /* Ensures the span takes full width of the parent th */
   position: absolute;
   left: 5%;
-  bottom: 140px;
+  bottom: 160px;
   border: none;
   border-collapse: separate;
   .icon-svg {
@@ -38,6 +38,11 @@ tbody th {
 
 @media (max-width: 850px) {
   table {
-    bottom: 110px;
+    bottom: 140px;
+  }
+}
+@media (max-width: 768px) {
+  table {
+    bottom: 100px;
   }
 }

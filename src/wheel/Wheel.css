@@ -96,12 +96,23 @@
     width: 80px;
   }
 }
+@media (max-width: 8500px) {
+  .slice-title {
+    font-size: 20px;
+  }
+  .slice-value {
+    font-size: 28px;
+  }
+  .icon-title {
+    width: 70px;
+  }
+}
 @media (max-width: 770px) {
   .slice-title {
     font-size: 20px;
   }
   .slice-value {
-    font-size: 32px;
+    font-size: 25px;
   }
   .icon-title {
     width: 70px;

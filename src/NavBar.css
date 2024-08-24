@@ -43,20 +43,18 @@ img {
     text-align: center;
     color: rgb(86, 86, 86);
     position: absolute;
-    top: 20px;
+    top: 30px;
     left: 35%;
   }
   .h1,
   h1 {
     font-size: 38px;
   }
-  .navbar {
-    max-height: 80px;
-  }
   img {
     width: 90px;
   }
   .navbar {
+    height: 100px;
     align-content: center;
     display: block;
     margin: auto;
