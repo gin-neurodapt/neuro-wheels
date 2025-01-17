@@ -9,14 +9,16 @@ export const TableGenerator = ({
   wheelId,
   activeSlicePercentages,
 }) => {
-  const rows = [[], [], [], []]; // Initialize 4 rows
-  const slices = Object.values(sliceNames);
-  const sliceIdMap = {};
+  // Create a map of slice names to slice IDs
+  const sliceIdMap = Object.values(sliceNames).reduce((acc, slice, index) => {
+    acc[slice] = index + 1;
+    return acc;
+  }, {});
 
-  slices.forEach((slice, index) => {
-    sliceIdMap[slice] = index + 1;
-    rows[index % 4].push(slice); // Distribute slices evenly across the 4 rows
-  });
+  // Distribute slices evenly across 4 rows
+  const rows = Array.from({ length: 4 }, (_, rowIndex) =>
+    Object.values(sliceNames).filter((_, index) => index % 4 === rowIndex)
+  );
 
   return (
     <div className="table">
@@ -35,7 +37,7 @@ export const TableGenerator = ({
                         <IconGenerator
                           wheelId={wheelId}
                           sliceId={sliceIdMap[slice]}
-                        ></IconGenerator>
+                        />
                       </span>
                       <span className="row row-name">{slice}</span>
                     </div>

@@ -96,7 +96,12 @@
     width: 80px;
   }
 }
-@media (max-width: 8500px) {
+@media (max-width: 1025px) and (max-height: 601px) {
+  .slice-value {
+    font-size: 30px;
+  }
+}
+@media (max-width: 850px) {
   .slice-title {
     font-size: 20px;
   }

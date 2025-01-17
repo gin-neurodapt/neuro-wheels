@@ -6,7 +6,11 @@ import {
 import { WHEEL_STROKE } from "../types/branding.config";
 import "./QuadrantGenerator.css";
 
-import { getWheelWidthUnits, isTabletScreen } from "../utils/dimensions.js";
+import {
+  getWheelWidthUnits,
+  isTabletScreen,
+  isMobileScreen,
+} from "../utils/dimensions.js";
 
 const Quadrant = ({ path, fill, onClick, wheelId }) => (
   <path d={path} stroke={WHEEL_STROKE[wheelId]} fill={fill} onClick={onClick} />
@@ -25,11 +29,14 @@ export const QuadrantGenerator = ({
       const wheel = wheelRef.current;
       if (!wheel) return;
       const isTablet = isTabletScreen(screenSize.width);
+      const isMobile = isMobileScreen(screenSize);
 
       wheel.style.position = "absolute";
       wheel.style.width = getWheelWidthUnits(screenSize, wheelSize.wheelWidth);
       wheel.style.height = `${wheelSize.wheelHeight}px`;
-      wheel.style.left = `${wheelSize.wheelLeft}${isTablet ? "px" : "vw"}`;
+      wheel.style.left = `${wheelSize.wheelLeft}${
+        isTablet || isMobile ? "px" : "vw"
+      }`;
       wheel.style.top = `${wheelSize.wheelTop}px`;
     };
 

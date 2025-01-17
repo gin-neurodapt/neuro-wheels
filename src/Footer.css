@@ -28,40 +28,24 @@ footer {
     font-size: 12px;
   }
 }
+@media (max-width: 1025px) and (max-height: 601px) {
+  footer {
+    height: 30px;
+    bottom: -350px;
+  }
+  .footer-title {
+    line-height: 120%;
+    font-size: 12px;
+  }
+}
 
 @media (max-width: 545px) {
   footer {
     height: 0px;
   }
-
 }
 @media (max-width: 435px) {
   footer {
-      bottom: 10%;
-  }
-}
-@media (max-width: 415px) {
-  footer {
-      bottom: 14%;
-  }
-}
-@media (max-width: 400px) {
-  footer {
-    bottom: 0%;
-  }
-}
-@media (max-width: 395px) {
-  footer {
-      bottom: 10%;
-  }
-}
-@media (max-width: 376px) {
-  footer {
-      bottom: 00%;
-  }
-}
-@media (max-width: 345px) {
-  footer {
-    bottom:8%;
+    bottom: 2%;
   }
 }

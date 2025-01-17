@@ -69,3 +69,21 @@ img {
     display: none;
   }
 }
+@media (max-width: 435px) {
+  .responsive-title {
+    text-align: center;
+    font-size: 25px;
+    top: 20px;
+  }
+  .h1,
+  h1 {
+    font-size: 28px;
+  }
+  img {
+    width: 70px;
+    margin-left: 15px;
+  }
+  .navbar {
+    height: 70px;
+  }
+}

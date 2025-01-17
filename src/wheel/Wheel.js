@@ -22,6 +22,7 @@ import {
   getScreenDimensions,
   getWheelPosition,
   getWheelWidthUnits,
+  isMobileScreen,
 } from "../utils/dimensions";
 
 const Wheel = ({
@@ -198,6 +199,14 @@ const Wheel = ({
     });
   };
 
+  const shouldReveal = (screenSize) => {
+    const reveal =
+      isTabletScreen(screenSize.width) || isMobileScreen(screenSize)
+        ? "show"
+        : "hide";
+    return reveal;
+  };
+
   return (
     <div className="body">
       <HandleWheelType
@@ -215,9 +224,7 @@ const Wheel = ({
         {Object.entries(sliceNames).map(([sliceId, slice]) => (
           <div key={sliceId} className={`slices slice-title-${sliceId}`}>
             <div className="icon-title">
-              <div
-                className={isTabletScreen(screenSize.width) ? "show" : "hide"}
-              >
+              <div className={shouldReveal(screenSize)}>
                 <IconGenerator
                   wheelId={wheelId}
                   sliceId={sliceId}
@@ -241,7 +248,7 @@ const Wheel = ({
             screenSize={screenSize}
           />
         </div>
-        <div className={isTabletScreen(screenSize.width) ? "show" : "hide"}>
+        <div className={shouldReveal(screenSize)}>
           <TableGenerator
             sliceNames={sliceNames}
             wheelId={wheelId}

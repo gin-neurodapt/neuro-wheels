@@ -1,77 +1,84 @@
 import { X_Y_POSITIONS } from "../types/wheel.structure.config";
 
-export const getScreenDimensions = () => {
-  const { width, height } = window.screen;
-  return { width, height };
-};
+// Utility Functions
+const cleanDecimals = (number) => Number(number.toFixed(2));
 
-const cleanDecimals = (number) => {
-  return JSON.parse(number.toFixed(2));
-};
+// Screen Type Utilities
+export const getScreenDimensions = () => ({
+  width: window.screen.width,
+  height: window.screen.height,
+});
 
 export const isMonitorScreen = (width) => width > 1600;
 export const isLaptopScreen = (width) => width > 1100;
-export const isTabletScreen = (width) => width <= 1024 && width > 600;
+export const isTabletScreen = (width) => width <= 1024 && width >= 600;
 export const isMobileScreen = (screenSize) =>
-  screenSize.height > screenSize.width;
-
-export const getWheelHeight = (screenSize) => {
-  const isMobile = isMobileScreen(screenSize);
-  const isTablet = isTabletScreen(screenSize.width);
-  return isMobile || isTablet ? screenSize.width / 2 : screenSize.height / 2;
-};
-
-export const getWheelWidth = (screenSize, diameter) => {
-  const isMobile = isMobileScreen(screenSize);
-  return isMobile ? screenSize.width * 0.5 : (diameter / 4.5 / diameter) * 100;
-};
-
-export const getDiameter = (screenSize) => {
-  return isMobileScreen(screenSize) ? screenSize.height : screenSize.width;
-};
-
-export const getWheelTop = (screenSize, wheelHeight) => {
-  const isTablet = isTabletScreen(screenSize.width);
-
-  return isMonitorScreen(screenSize.width)
-    ? screenSize.height * 0.225
-    : isTablet
-    ? screenSize.height / 4
-    : (screenSize.height - wheelHeight) / 2.75;
-};
-
-export const getWheelDimensions = (screenSize, diameter) => {
-  const width = getWheelWidth(screenSize, diameter);
-  const height = getWheelHeight(screenSize);
-
-  return { width, height };
-};
-
-const getWheelLeft = (screenSize, wheelWidth) => {
-  // const isMobile = isMobileScreen(screenSize);
-  const isTablet = isTabletScreen(screenSize.width);
-  return isTablet ? screenSize.width * 0.25 : 50 - wheelWidth / 2;
-};
-
-export const getWheelCoordinates = (screenSize, wheelWidth, wheelHeight) => {
-  const left = getWheelLeft(screenSize, wheelWidth);
-  const top = getWheelTop(screenSize, wheelHeight);
-
-  return { left, top };
-};
+  screenSize.height > screenSize.width && screenSize.width < 600;
 
 export const getScreenType = (screenSize) => {
-  return isLaptopScreen(screenSize.width)
-    ? "monitor"
-    : isTabletScreen(screenSize.width)
-    ? "tablet"
-    : "mobile";
+  if (isLaptopScreen(screenSize.width)) return "monitor";
+  if (isTabletScreen(screenSize.width)) return "tablet";
+  return "mobile";
 };
+
+// Wheel Dimensions
+const calculateWheelHeight = (screenSize) => {
+  if (isMobileScreen(screenSize)) return screenSize.width * 0.85;
+  if (isTabletScreen(screenSize.width)) return screenSize.width / 2;
+  return screenSize.height / 2;
+};
+
+const calculateWheelWidth = (screenSize, diameter) => {
+  if (isMobileScreen(screenSize)) {
+    return screenSize.width * 0.75;
+  }
+  if (isTabletScreen(screenSize.width)) {
+    return screenSize.height > screenSize.width
+      ? screenSize.width * 0.5
+      : screenSize.width * 0.35;
+  }
+  return (diameter / 4.5 / diameter) * 100;
+};
+
+const calculateWheelTop = (screenSize, wheelHeight) => {
+  if (isMonitorScreen(screenSize.width)) {
+    return screenSize.height * 0.225;
+  }
+  if (isTabletScreen(screenSize.width)) {
+    return screenSize.height / 4;
+  }
+  return (screenSize.height - wheelHeight) / 2.25; // mobile
+};
+
+const calculateWheelLeft = (screenSize, wheelWidth) => {
+  if (isTabletScreen(screenSize.width)) {
+    const tabletWidth = calculateWheelWidth(screenSize, wheelWidth);
+    return (screenSize.width - tabletWidth) * 0.5;
+  }
+  if (isMobileScreen(screenSize)) {
+    const mobileWidth = calculateWheelWidth(screenSize, wheelWidth);
+    return (screenSize.width - mobileWidth) * 0.5;
+  }
+  return 50 - wheelWidth / 2; // Monitor
+};
+
+// Public Wheel Position and Dimension Functions
+export const getDiameter = (screenSize) =>
+  isMobileScreen(screenSize) || isTabletScreen(screenSize)
+    ? screenSize.height
+    : screenSize.width;
+
+export const getWheelDimensions = (screenSize, diameter) => ({
+  width: calculateWheelWidth(screenSize, diameter),
+  height: calculateWheelHeight(screenSize),
+});
 
 export const getWheelPosition = (screenSize) => {
   const diameter = getDiameter(screenSize);
   const { width, height } = getWheelDimensions(screenSize, diameter);
-  const { left, top } = getWheelCoordinates(screenSize, width, height);
+  const left = calculateWheelLeft(screenSize, width);
+  const top = calculateWheelTop(screenSize, height);
+
   return {
     wheelWidth: cleanDecimals(width),
     wheelHeight: cleanDecimals(height),
@@ -81,16 +88,16 @@ export const getWheelPosition = (screenSize) => {
 };
 
 export const getWheelWidthUnits = (screenSize, width) => {
-  return `${width}${isMobileScreen(screenSize) ? "px" : "vw"}`;
+  return `${width}${
+    isMobileScreen(screenSize) || isTabletScreen(screenSize.width) ? "px" : "vw"
+  }`;
 };
 
-export const calculateTextWidth = (isMonitor) => {
-  return isMonitor ? 180 : 140;
-};
+// Text Position Utilities
+export const calculateTextWidth = (isMonitor) => (isMonitor ? 180 : 140);
 
-export const calculateTextLeft = (x, width, isMonitor) => {
-  return `${x - width / (isMonitor ? 2.25 : 2)}px`;
-};
+export const calculateTextLeft = (x, width, isMonitor) =>
+  `${x - width / (isMonitor ? 2.25 : 2)}px`;
 
 export const calculateCenterCoordinates = (screenSize, wheel) => {
   const wheelRadius = wheel.clientWidth / 2;
