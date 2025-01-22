@@ -111,3 +111,9 @@
     text-align: left;
   }
 }
+@media (max-width: 600px) {
+  .wheel-selection {
+    top: 7%;
+    right: 15%;
+  }
+}

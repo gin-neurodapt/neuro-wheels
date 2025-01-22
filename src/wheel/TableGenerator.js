@@ -8,6 +8,7 @@ export const TableGenerator = ({
   sliceNames,
   wheelId,
   activeSlicePercentages,
+  tableBottom,
 }) => {
   // Create a map of slice names to slice IDs
   const sliceIdMap = Object.values(sliceNames).reduce((acc, slice, index) => {
@@ -22,7 +23,7 @@ export const TableGenerator = ({
 
   return (
     <div className="table">
-      <table>
+      <table style={{ bottom: tableBottom }}>
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>

@@ -10,9 +10,8 @@ const Footer = () => {
           Developed by Gin Maher
           <br />
           Clinical Hypnotherapist and Strategic Psychotherapist Sydney
-          <br />
-          Mindset Coach Sydney
           <br />© 2024 NeuroDapt, All Rights Reserved
+          <br />
         </h6>
       </div>
     </footer>

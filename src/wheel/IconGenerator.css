@@ -9,3 +9,9 @@
     height: 25px;
   }
 }
+@media (max-width: 400px) {
+  .icon-svg {
+    width: 20px;
+    height: 20px;
+  }
+}

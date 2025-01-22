@@ -15,7 +15,7 @@ table {
 }
 
 span .row {
-  margin-right: 40px;
+  /* margin-right: 40px; */
 }
 
 tbody th {
@@ -51,10 +51,7 @@ tbody th {
     bottom: 100px;
   }
 }
-@media (max-width: 431px) {
-  table {
-    bottom: 5%;
-  }
+@media (max-width: 545px) {
   .row-name {
     font-size: 14px;
   }
@@ -66,6 +63,14 @@ tbody th {
     margin-right: 20px;
   }
   tbody th {
-    padding: 7px 25px;
+    padding: 8px 25px 6px;
+  }
+}
+@media (max-width: 400px) {
+  .row-name {
+    font-size: 12px;
+  }
+  .percentage {
+    width: 20px;
   }
 }

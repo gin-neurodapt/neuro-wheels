@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./Wheel.css";
-import { QUADRANT_FILL } from "../types/branding.config";
+import { QUADRANT_FILL, WHEEL_PERCENTAGE } from "../types/branding.config";
 import { WHEEL_STRUCTURE, PERCENTAGES } from "../types/wheel.structure.config";
-import {
-  WHEEL_TYPES,
-  WHEEL_CLASS_NAMES,
-  SLICE_NAMES,
-} from "../types/wheel.type.config";
+import { WHEEL_TYPES, SLICE_NAMES } from "../types/wheel.type.config";
 import { QuadrantHandler } from "../utils/QuadrantHandler";
 import { QuadrantGenerator } from "./QuadrantGenerator";
 import HandleWheelType from "../utils/HandleWheelType";
@@ -17,12 +13,12 @@ import { IconGenerator } from "./IconGenerator";
 import { TableGenerator } from "./TableGenerator";
 import {
   getTextPosition,
-  isTabletScreen,
+  shouldReveal,
   getScreenType,
   getScreenDimensions,
   getWheelPosition,
   getWheelWidthUnits,
-  isMobileScreen,
+  getTableBottom,
 } from "../utils/dimensions";
 
 const Wheel = ({
@@ -199,14 +195,6 @@ const Wheel = ({
     });
   };
 
-  const shouldReveal = (screenSize) => {
-    const reveal =
-      isTabletScreen(screenSize.width) || isMobileScreen(screenSize)
-        ? "show"
-        : "hide";
-    return reveal;
-  };
-
   return (
     <div className="body">
       <HandleWheelType
@@ -219,7 +207,11 @@ const Wheel = ({
         handleFileNameChange={handleFileNameChange}
         customFileName={customFileName}
       />
-      <ResetWheel resetWheel={resetWheel} resetAllWheels={resetAllWheels} />
+      <ResetWheel
+        resetWheel={resetWheel}
+        resetAllWheels={resetAllWheels}
+        screenSize={screenSize}
+      />
       <div>
         {Object.entries(sliceNames).map(([sliceId, slice]) => (
           <div key={sliceId} className={`slices slice-title-${sliceId}`}>
@@ -232,7 +224,10 @@ const Wheel = ({
               </div>
               <div className="slice-title">{abbreviate(slice, screenSize)}</div>
             </div>
-            <div className={`slice-value ${WHEEL_CLASS_NAMES[wheelId]}`}>
+            <div
+              className={`slice-value`}
+              style={{ color: WHEEL_PERCENTAGE[wheelId] }}
+            >
               {activeSlicePercentages[slice]}%
             </div>
           </div>
@@ -253,6 +248,7 @@ const Wheel = ({
             sliceNames={sliceNames}
             wheelId={wheelId}
             activeSlicePercentages={activeSlicePercentages}
+            tableBottom={getTableBottom(screenSize, wheelSize)}
           ></TableGenerator>
         </div>
       </div>

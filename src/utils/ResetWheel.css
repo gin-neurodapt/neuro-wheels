@@ -44,3 +44,24 @@
     font-size: 16px;
   }
 }
+@media (max-width: 600px) {
+  .reset-btn {
+    height: 35px;
+  }
+  .btn-light {
+    font-size: 14px;
+  }
+}
+@media (max-width: 400px) {
+  .reset-btn {
+    top: 12%;
+    height: 25px;
+  }
+  .btn-light {
+    font-size: 12px;
+    background-color: white;
+    border-bottom: 1px solid rgba(174, 174, 174, 0.6);
+    border-radius: 0;
+    padding: 0px 2px;
+  }
+}

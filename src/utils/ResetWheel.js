@@ -1,7 +1,9 @@
 import React from "react";
 import "./ResetWheel.css";
 
-export const ResetWheel = ({ resetAllWheels, resetWheel }) => {
+import { shouldHide } from "../utils/dimensions";
+
+export const ResetWheel = ({ resetAllWheels, resetWheel, screenSize }) => {
   return (
     <div className="rest-content">
       <div className="reset-btn">
@@ -13,14 +15,16 @@ export const ResetWheel = ({ resetAllWheels, resetWheel }) => {
         >
           Reset
         </button>
-        <button
-          type="button"
-          className="btn btn-light btn-txt"
-          title="reset all wheels"
-          onClick={resetAllWheels}
-        >
-          Reset All
-        </button>
+        <span className={shouldHide(screenSize)}>
+          <button
+            type="button"
+            className={`btn btn-light btn-txt }`}
+            title="reset all wheels"
+            onClick={resetAllWheels}
+          >
+            Reset All
+          </button>
+        </span>
       </div>
     </div>
   );

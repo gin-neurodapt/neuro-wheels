@@ -1,15 +1,15 @@
 export const WHEEL_CLASS_NAMES = {
   1: "life",
-  // 2: "relationships",
-  // 3: "business",
+  2: "relationships",
+  3: "business",
   // 4: "self",
 };
 
 export const WHEEL_TYPES = {
   1: "Wheel of Life",
-  // 2: "Wheel of Relationships",
-  // 3: "Wheel of Business",
-  // 4: "Wheel of Know Thyself",
+  2: "Wheel of Relationships",
+  3: "Wheel of Business",
+  // 4: "Wheel of Self",
 };
 
 export const SLICE_NAMES = {
@@ -24,14 +24,14 @@ export const SLICE_NAMES = {
     8: "Health & Fitness",
   },
   2: {
-    1: "Honest Communication",
+    1: "Trust",
     2: "Vulnerability",
-    3: "Trust & Love",
+    3: "Shared Responsibilities",
     4: "Respect & Kindness",
-    5: "Intimacy & Sex",
+    5: "Love",
     6: "Fun",
-    7: "Shared Responsibilities",
-    8: "Physical Attention",
+    7: "Physical Intimacy",
+    8: "Sex",
   },
   3: {
     1: "Profit Margin",

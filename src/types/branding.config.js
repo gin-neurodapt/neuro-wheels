@@ -3,14 +3,21 @@ export const QUADRANT_FILL = {
   Selected: {
     1: "#B2E5DD",
     2: "#fa9e9e",
-    3: "#fb9",
+    3: "#cedcff",
     4: "#58d7cb",
   },
 };
 
 export const WHEEL_STROKE = {
   1: "#177082",
-  2: "#f67055",
-  3: "#f68a55",
+  2: "#b95946",
+  3: "#7087c2",
+  4: "#118890",
+};
+
+export const WHEEL_PERCENTAGE = {
+  1: "#6aa3af",
+  2: "#b95946",
+  3: "#4065bf",
   4: "#118890",
 };

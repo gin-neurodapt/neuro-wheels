@@ -18,7 +18,7 @@ export const isMobileScreen = (screenSize) =>
 export const getScreenType = (screenSize) => {
   if (isLaptopScreen(screenSize.width)) return "monitor";
   if (isTabletScreen(screenSize.width)) return "tablet";
-  return "mobile";
+  return screenSize.width < 400 ? "mobile>400" : "mobile";
 };
 
 // Wheel Dimensions
@@ -30,7 +30,8 @@ const calculateWheelHeight = (screenSize) => {
 
 const calculateWheelWidth = (screenSize, diameter) => {
   if (isMobileScreen(screenSize)) {
-    return screenSize.width * 0.75;
+    if (screenSize.width < 400) return screenSize.width * 0.75;
+    return screenSize.width * 0.8;
   }
   if (isTabletScreen(screenSize.width)) {
     return screenSize.height > screenSize.width
@@ -47,7 +48,7 @@ const calculateWheelTop = (screenSize, wheelHeight) => {
   if (isTabletScreen(screenSize.width)) {
     return screenSize.height / 4;
   }
-  return (screenSize.height - wheelHeight) / 2.25; // mobile
+  return (screenSize.height - wheelHeight) / 3; // mobile
 };
 
 const calculateWheelLeft = (screenSize, wheelWidth) => {
@@ -73,6 +74,14 @@ export const getWheelDimensions = (screenSize, diameter) => ({
   height: calculateWheelHeight(screenSize),
 });
 
+export const getTableBottom = (screenSize, { wheelTop, wheelHeight }) => {
+  if (isMobileScreen(screenSize)) {
+    const verticalSpace = screenSize.height - wheelTop - wheelHeight;
+    if (verticalSpace < 400) return `${-12}%`;
+    return `${2.5}%`;
+  }
+};
+
 export const getWheelPosition = (screenSize) => {
   const diameter = getDiameter(screenSize);
   const { width, height } = getWheelDimensions(screenSize, diameter);
@@ -94,7 +103,12 @@ export const getWheelWidthUnits = (screenSize, width) => {
 };
 
 // Text Position Utilities
-export const calculateTextWidth = (isMonitor) => (isMonitor ? 180 : 140);
+export const calculateTextWidth = (screenSize, index) => {
+  const isMonitor = isMonitorScreen(screenSize.width);
+  if (isMonitor) return 180;
+  const iconIsOnRightSide = index === 1 || index === 2;
+  return isMobileScreen(screenSize) && iconIsOnRightSide ? 70 : 140;
+};
 
 export const calculateTextLeft = (x, width, isMonitor) =>
   `${x - width / (isMonitor ? 2.25 : 2)}px`;
@@ -118,11 +132,19 @@ const getCoordinate = (position, wheelSize, index) => {
 };
 
 export const getTextPosition = (screenSize, index, wheelSize, screenType) => {
-  const isMonitor = isMonitorScreen(screenSize.width);
-  const width = calculateTextWidth(isMonitor);
+  const width = calculateTextWidth(screenSize, index);
   const position = X_Y_POSITIONS[screenType]; // Use screenType dynamically if needed
 
   const { x: left, y: top } = getCoordinate(position, wheelSize, index);
 
   return { left, width, top };
+};
+
+export const shouldReveal = (screenSize) => {
+  return isTabletScreen(screenSize.width) || isMobileScreen(screenSize)
+    ? "show"
+    : "hide";
+};
+export const shouldHide = (screenSize) => {
+  return isMobileScreen(screenSize) ? "hide" : "show";
 };

@@ -46,18 +46,6 @@
   text-align: end;
 }
 
-.life {
-  color: #709fa9;
-}
-.relationships {
-  color: #ff7029db;
-}
-.business {
-  color: #f67055;
-}
-.self {
-  color: #118890;
-}
 .slice-title {
   font-size: 13px;
   width: auto;
@@ -113,6 +101,9 @@
   }
 }
 @media (max-width: 770px) {
+  .slices {
+    width: 70px;
+  }
   .slice-title {
     font-size: 20px;
   }
@@ -121,5 +112,16 @@
   }
   .icon-title {
     width: 70px;
+  }
+}
+@media (max-width: 400px) {
+  .slice-title {
+    font-size: 16px;
+  }
+  .slice-value {
+    font-size: 22px;
+  }
+  .icon-title {
+    width: 60px;
   }
 }
