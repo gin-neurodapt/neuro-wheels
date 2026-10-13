@@ -1,0 +1,18 @@
+# Security headers for Cloudflare Pages (this file is copied into the build).
+# The page is fully static and loads nothing from any other site, so the
+# Content-Security-Policy allows this site only.
+#
+# frame-ancestors allows NeuroDapt's own sites to embed the page (e.g. on
+# neurodapt.au) and no one else. Change it to 'none' to forbid embedding.
+
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self' https://neurodapt.au https://*.neurodapt.au; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), browsing-topics=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

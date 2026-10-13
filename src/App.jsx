@@ -1,0 +1,114 @@
+import { useCallback, useEffect, useState } from 'react';
+import logoUrl from './assets/logo.svg';
+import { WHEELS, findWheel } from './wheels/config.js';
+import { tapLevel, stepLevel, emptyLevels } from './wheels/scores.js';
+import { loadState, saveState, initialState, wheelFromHash } from './wheels/storage.js';
+import { WheelPicker } from './components/WheelPicker.jsx';
+import { WheelChart } from './components/WheelChart.jsx';
+import { ScoreList } from './components/ScoreList.jsx';
+import { Actions } from './components/Actions.jsx';
+
+function deviceStorage() {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function startingState() {
+  const state = loadState(deviceStorage());
+  const fromLink = wheelFromHash(window.location.hash);
+  return fromLink ? { ...state, active: fromLink } : state;
+}
+
+export default function App() {
+  const [state, setState] = useState(startingState);
+  const wheel = findWheel(state.active) || WHEELS[0];
+  const levels = state.scores[wheel.id];
+
+  useEffect(() => saveState(deviceStorage(), state), [state]);
+
+  // Keep the address showing the open wheel (#life, #relationships,
+  // #business) without adding history entries, and follow it if it changes.
+  useEffect(() => {
+    const hash = `#${wheel.id}`;
+    if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
+    document.title = `${wheel.title} · NeuroDapt`;
+  }, [wheel.id, wheel.title]);
+
+  useEffect(() => {
+    const onHash = () => {
+      const id = wheelFromHash(window.location.hash);
+      if (id) setState((s) => (s.active === id ? s : { ...s, active: id }));
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  const updateLevel = useCallback((sliceIndex, next) => {
+    setState((s) => {
+      const current = s.scores[s.active];
+      const value = next(current[sliceIndex]);
+      if (value === current[sliceIndex]) return s;
+      const updated = [...current];
+      updated[sliceIndex] = value;
+      return { ...s, scores: { ...s.scores, [s.active]: updated } };
+    });
+  }, []);
+
+  const onTap = useCallback((i, level) => updateLevel(i, (cur) => tapLevel(cur, level)), [updateLevel]);
+  const onStep = useCallback((i, delta) => updateLevel(i, (cur) => stepLevel(cur, delta)), [updateLevel]);
+  const onChoose = useCallback((id) => setState((s) => ({ ...s, active: id })), []);
+  const onLabel = useCallback((label) => setState((s) => ({ ...s, label })), []);
+  const onResetWheel = useCallback(
+    () => setState((s) => ({ ...s, scores: { ...s.scores, [s.active]: emptyLevels(findWheel(s.active)) } })),
+    [],
+  );
+  const onResetAll = useCallback(() => setState((s) => ({ ...initialState(), active: s.active, label: s.label })), []);
+
+  const anyScores = Object.values(state.scores).some((l) => l.some(Boolean));
+
+  return (
+    <div className="page" style={{ '--accent': wheel.ink, '--accent-fill': wheel.fill }}>
+      <header className="site-header">
+        <a className="brand" href="https://www.neurodapt.au/" rel="noopener">
+          <img src={logoUrl} alt="NeuroDapt" width="115" height="79" />
+        </a>
+      </header>
+
+      <main className="main">
+        <div className="intro">
+          <h1>{wheel.title}</h1>
+          <WheelPicker wheels={WHEELS} activeId={wheel.id} onChoose={onChoose} />
+          <p className="hint">
+            Choose a ring to score each area: the outer ring is 100%. Choose the same ring again to clear it.
+          </p>
+        </div>
+
+        <WheelChart wheel={wheel} levels={levels} onTap={onTap} />
+
+        <ScoreList wheel={wheel} levels={levels} onStep={onStep} />
+
+        <Actions
+          wheel={wheel}
+          levels={levels}
+          label={state.label}
+          onLabel={onLabel}
+          onResetWheel={onResetWheel}
+          onResetAll={onResetAll}
+          anyScores={anyScores}
+          logoUrl={logoUrl}
+        />
+      </main>
+
+      <footer className="site-footer">
+        <p>Your scores stay on this device. Nothing is sent anywhere.</p>
+        <p>
+          Developed by Gin Maher, Clinical Hypnotherapist and Strategic Psychotherapist, Sydney.
+          <br />© {new Date().getFullYear()} NeuroDapt. All rights reserved.
+        </p>
+      </footer>
+    </div>
+  );
+}
