@@ -67,8 +67,10 @@ Links can open a particular wheel directly: `/#life`, `/#relationships`,
 The site is static, so Cloudflare Pages hosts it for free on its own
 address, separate from the clinic app.
 
-1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** →
-   **Connect to Git** → choose `gin-neurodapt/neuro-wheels`.
+1. Cloudflare dashboard → **Workers & Pages** → **Create application**. That
+   screen opens on the *Workers* flow: switch to **Pages** (the "Pages" tab, or
+   "Looking to deploy Pages? Get started"), then **Import an existing Git
+   repository** → choose `gin-neurodapt/neuro-wheels`.
 2. Settings:
    - Production branch: `main`
    - Framework preset: **None**
