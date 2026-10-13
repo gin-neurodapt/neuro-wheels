@@ -2,9 +2,46 @@ import { describe, expect, it } from 'vitest';
 import { WHEELS, UI_ICONS, LEVELS } from '../src/wheels/config.js';
 import { ICON_PATHS } from '../src/wheels/icons.generated.js';
 import { tapLevel, stepLevel, toPercent, averagePercent } from '../src/wheels/scores.js';
-import { segmentPath, splitName, layoutLabels, polar, WHEEL_RADIUS } from '../src/wheels/geometry.js';
-import { parseState, loadState, saveState, STORAGE_KEY, wheelFromHash } from '../src/wheels/storage.js';
-import { cleanLabel, imageFileName, LABEL_MAX } from '../src/wheels/filename.js';
+import {
+  segmentPath,
+  scoreArcPath,
+  splitName,
+  layoutLabels,
+  namesFit,
+  polar,
+  estimateWidth,
+  valueFont,
+  nameFont,
+  WIDEST_VALUE,
+  WHEEL_RADIUS,
+  LABEL_STYLES,
+  MIN_NAME_PX,
+} from '../src/wheels/geometry.js';
+import {
+  parseState,
+  loadState,
+  saveState,
+  STORAGE_KEY,
+  ACTIVE_KEY,
+  wheelFromHash,
+} from '../src/wheels/storage.js';
+import { cleanLabel, imageFileName, displayLabel, LABEL_MAX } from '../src/wheels/filename.js';
+
+function memoryStorage() {
+  const map = new Map();
+  let writes = 0;
+  return {
+    map,
+    get writes() {
+      return writes;
+    },
+    getItem: (k) => (map.has(k) ? map.get(k) : null),
+    setItem: (k, v) => {
+      writes++;
+      map.set(k, String(v));
+    },
+  };
+}
 
 describe('config', () => {
   it('has an icon drawing for every icon it names (run `npm run icons` if this fails)', () => {
@@ -20,7 +57,7 @@ describe('config', () => {
     }
   });
 
-  it('keeps every text colour readable on white (WCAG AA, 4.5:1)', () => {
+  it('keeps each wheel’s text colour (ink) readable on white (WCAG AA, 4.5:1)', () => {
     const lum = (hex) => {
       const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
       const lin = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
@@ -68,8 +105,12 @@ describe('geometry', () => {
   it('starts slice 0 at 12 o’clock and goes clockwise', () => {
     expect(polar(100, 0)).toEqual([0, -100]);
     expect(polar(100, 90)).toEqual([100, 0]);
-    // Slice 0's outer edge starts straight up at the rim.
     expect(segmentPath(0, 5, 8).startsWith(`M0 -${WHEEL_RADIUS}`)).toBe(true);
+  });
+
+  it('marks a score with an arc at that ring, and nothing at 0', () => {
+    expect(scoreArcPath(0, 0, 8)).toBe(null);
+    expect(scoreArcPath(0, 3, 8)).toBe(`M0 -300A300 300 0 0 1 ${polar(300, 45).join(' ')}`);
   });
 
   it('wraps names without leaving "&" at the end of a line', () => {
@@ -80,27 +121,56 @@ describe('geometry', () => {
     expect(splitName('Love')).toEqual(['Love']);
   });
 
-  it('keeps every label outside the wheel and inside the drawing, for every wheel and style', () => {
-    for (const wheel of WHEELS) {
-      for (const mode of ['full', 'compact']) {
-        const { labels, halfW, halfH } = layoutLabels(wheel.slices, mode);
-        for (const { box } of labels) {
-          expect(box.left).toBeGreaterThanOrEqual(-halfW);
-          expect(box.right).toBeLessThanOrEqual(halfW);
-          expect(box.top).toBeGreaterThanOrEqual(-halfH);
-          expect(box.bottom).toBeLessThanOrEqual(halfH);
-          // The point of the box nearest the centre must be beyond the rim.
+  // Where each part of a label is actually drawn, given its text anchor.
+  function extentX(x, width, anchor) {
+    if (anchor === 'start') return [x, x + width];
+    if (anchor === 'end') return [x - width, x];
+    return [x - width / 2, x + width / 2];
+  }
+
+  for (const mode of ['full', 'compact']) {
+    it(`${mode} labels: icon, percentage and name are drawn inside the label, on the outward side, clear of the wheel`, () => {
+      for (const wheel of WHEELS) {
+        const { labels } = layoutLabels(wheel.slices, mode);
+        labels.forEach((label, i) => {
+          const where = `${wheel.id} ${mode} slice ${i}`;
+          const { box } = label;
+          const inBox = ([l, r], top, bottom, what) => {
+            expect(l, `${where} ${what} left`).toBeGreaterThanOrEqual(box.left - 0.01);
+            expect(r, `${where} ${what} right`).toBeLessThanOrEqual(box.right + 0.01);
+            expect(top, `${where} ${what} top`).toBeGreaterThanOrEqual(box.top - 0.01);
+            expect(bottom, `${where} ${what} bottom`).toBeLessThanOrEqual(box.bottom + 0.01);
+          };
+          const { icon, value } = label;
+          inBox([icon.x, icon.x + icon.size], icon.y, icon.y + icon.size, 'icon');
+          const valueW = estimateWidth(WIDEST_VALUE, valueFont(value.size));
+          const valueX = extentX(value.x, valueW, label.anchor);
+          inBox(valueX, value.y - value.size * 0.74, value.y, 'percentage');
+          for (const line of label.name) {
+            const w = estimateWidth(line.text, nameFont(line.size));
+            inBox(extentX(line.x, w, label.anchor), line.y - line.size * 0.78, line.y, `name "${line.text}"`);
+          }
+          // The icon and the percentage must not sit on top of each other.
+          const iconX = [icon.x, icon.x + icon.size];
+          const iconY = [icon.y, icon.y + icon.size];
+          const valueY = [value.y - value.size * 0.74, value.y];
+          const overlapX = iconX[0] < valueX[1] && valueX[0] < iconX[1];
+          const overlapY = iconY[0] < valueY[1] && valueY[0] < iconY[1];
+          expect(overlapX && overlapY, `${where} icon over percentage`).toBe(false);
+          // Labels sit on their slice's side of the wheel...
+          const mid = ((i + 0.5) * 360) / wheel.slices.length;
+          if (mid < 180) expect(box.left + box.right, `${where} side`).toBeGreaterThan(0);
+          else expect(box.left + box.right, `${where} side`).toBeLessThan(0);
+          // ...and their nearest point is beyond the rim.
           const nx = Math.max(box.left, Math.min(0, box.right));
           const ny = Math.max(box.top, Math.min(0, box.bottom));
-          expect(Math.hypot(nx, ny), `${wheel.id} ${mode}`).toBeGreaterThan(WHEEL_RADIUS);
-        }
+          expect(Math.hypot(nx, ny), `${where} rim`).toBeGreaterThan(WHEEL_RADIUS);
+        });
       }
-    }
-  });
+    });
 
-  it('keeps labels from overlapping each other', () => {
-    for (const wheel of WHEELS) {
-      for (const mode of ['full', 'compact']) {
+    it(`${mode} labels do not overlap each other`, () => {
+      for (const wheel of WHEELS) {
         const { labels } = layoutLabels(wheel.slices, mode);
         for (let a = 0; a < labels.length; a++) {
           for (let b = a + 1; b < labels.length; b++) {
@@ -111,23 +181,33 @@ describe('geometry', () => {
           }
         }
       }
-    }
+    });
+  }
+
+  it('shows names only when they would be at least 12px on screen', () => {
+    const full = layoutLabels(WHEELS[0].slices, 'full');
+    // The width at which names come out at exactly MIN_NAME_PX.
+    const threshold = (MIN_NAME_PX / LABEL_STYLES.full.name) * 2 * full.halfW;
+    expect(namesFit({ areaWidth: threshold + 1, heightBudget: Infinity, full })).toBe(true);
+    expect(namesFit({ areaWidth: threshold - 1, heightBudget: Infinity, full })).toBe(false);
+    expect(namesFit({ areaWidth: 1200, heightBudget: Infinity, full })).toBe(true);
+    expect(namesFit({ areaWidth: 390, heightBudget: Infinity, full })).toBe(false);
   });
 
-  it('does not move the wheel when a score changes (layout ignores scores)', () => {
-    const a = layoutLabels(WHEELS[0].slices, 'full');
-    const b = layoutLabels(WHEELS[0].slices, 'full');
-    expect(a).toEqual(b);
+  it('counts the screen height too: a wide but short space gets no names', () => {
+    const full = layoutLabels(WHEELS[0].slices, 'full');
+    const heightAtThreshold = ((MIN_NAME_PX / LABEL_STYLES.full.name) * 2 * full.halfW * full.halfH) / full.halfW;
+    expect(namesFit({ areaWidth: 1400, heightBudget: heightAtThreshold - 1, full })).toBe(false);
+    expect(namesFit({ areaWidth: 1400, heightBudget: heightAtThreshold + 1, full })).toBe(true);
   });
 });
 
 describe('saved scores', () => {
   const life = WHEELS[0];
 
-  it('restores valid saved scores', () => {
-    const raw = JSON.stringify({ active: 'business', scores: { life: [1, 2, 3, 4, 5, 0, 1, 2] }, label: 'Week 5' });
+  it('restores valid saved scores and the label', () => {
+    const raw = JSON.stringify({ scores: { life: [1, 2, 3, 4, 5, 0, 1, 2] }, label: 'Week 5' });
     const s = parseState(raw);
-    expect(s.active).toBe('business');
     expect(s.scores.life).toEqual([1, 2, 3, 4, 5, 0, 1, 2]);
     expect(s.scores.relationships).toEqual(new Array(8).fill(0));
     expect(s.label).toBe('Week 5');
@@ -138,17 +218,25 @@ describe('saved scores', () => {
       'not json',
       'null',
       '[]',
-      JSON.stringify({ active: '__proto__', scores: { life: [9, 9, 9, 9, 9, 9, 9, 9] } }),
+      JSON.stringify({ scores: { life: [9, 9, 9, 9, 9, 9, 9, 9] } }),
       JSON.stringify({ scores: { life: [1, 2, 3] } }),
       JSON.stringify({ scores: { life: ['1', 2, 3, 4, 5, 0, 1, 2] } }),
       JSON.stringify({ scores: { life: [1.5, 2, 3, 4, 5, 0, 1, 2] } }),
+      JSON.stringify({ scores: { __proto__: { life: [5, 5, 5, 5, 5, 5, 5, 5] } } }),
       JSON.stringify({ label: 42 }),
     ]) {
       const s = parseState(raw);
-      expect(s.active).toBe('life');
-      expect(s.scores.life).toEqual(new Array(life.slices.length).fill(0));
+      expect(s.scores.life, raw).toEqual(new Array(life.slices.length).fill(0));
       expect(s.label).toBe('');
     }
+  });
+
+  it('remembers the open wheel separately, and ignores one that does not exist', () => {
+    const storage = memoryStorage();
+    storage.setItem(ACTIVE_KEY, 'business');
+    expect(loadState(storage).active).toBe('business');
+    storage.setItem(ACTIVE_KEY, '__proto__');
+    expect(loadState(storage).active).toBe('life');
   });
 
   it('survives storage that throws (private browsing, blocked storage)', () => {
@@ -165,14 +253,23 @@ describe('saved scores', () => {
   });
 
   it('round-trips through storage', () => {
-    const mem = new Map();
-    const storage = { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => mem.set(k, v) };
+    const storage = memoryStorage();
     const state = loadState(storage);
     state.scores.business[3] = 4;
     state.active = 'business';
+    state.label = 'Week 2';
     saveState(storage, state);
-    expect(mem.has(STORAGE_KEY)).toBe(true);
+    expect(storage.map.has(STORAGE_KEY)).toBe(true);
     expect(loadState(storage)).toEqual(state);
+  });
+
+  it('does not rewrite storage when nothing changed (that would wake other tabs)', () => {
+    const storage = memoryStorage();
+    const state = loadState(storage);
+    saveState(storage, state);
+    const after = storage.writes;
+    saveState(storage, { ...state, scores: { ...state.scores } });
+    expect(storage.writes).toBe(after);
   });
 
   it('opens a wheel from the address only when it is a real wheel', () => {
@@ -187,6 +284,7 @@ describe('image file name', () => {
   it('names the image after the wheel and the optional label', () => {
     expect(imageFileName('Wheel of Life', '')).toBe('NeuroDapt - Wheel of Life.png');
     expect(imageFileName('Wheel of Life', 'week 5')).toBe('NeuroDapt - Wheel of Life - Week 5.png');
+    expect(displayLabel('  week 5.  ')).toBe('Week 5');
   });
 
   it('removes characters that are not allowed in file names', () => {

@@ -88,3 +88,13 @@ requests), `nosniff`, a referrer policy, a permissions policy that turns off
 camera/microphone/location, and long-term caching for the hashed files in
 `/assets/`. Embedding in a frame is allowed only from `neurodapt.au` and its
 subdomains. Change `frame-ancestors` to `'none'` to forbid embedding.
+
+**Cloudflare features that inject scripts conflict with this policy.** The
+policy blocks any script it did not ship with, so for this subdomain keep
+**Rocket Loader** off (it would leave the page blank), and don't turn on
+automatic **Web Analytics** injection or **Zaraz**. Bot Fight Mode's
+JavaScript check is blocked too; that only shows as a console message, and
+the page works.
+
+If the page is embedded in a frame, phones can't open the share sheet unless
+the frame has `allow="web-share"`; without it, the image downloads instead.

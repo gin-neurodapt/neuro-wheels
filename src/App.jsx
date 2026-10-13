@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import logoUrl from './assets/logo.svg';
 import { WHEELS, findWheel } from './wheels/config.js';
 import { tapLevel, stepLevel, emptyLevels } from './wheels/scores.js';
-import { loadState, saveState, initialState, wheelFromHash } from './wheels/storage.js';
+import { loadState, saveState, initialState, parseState, wheelFromHash, STORAGE_KEY } from './wheels/storage.js';
 import { WheelPicker } from './components/WheelPicker.jsx';
 import { WheelChart } from './components/WheelChart.jsx';
 import { ScoreList } from './components/ScoreList.jsx';
@@ -46,6 +46,18 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  // Another open tab changed the scores: take them, keep this tab's wheel.
+  // (Without this, whichever tab saved last would wipe the other's scores.)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key !== STORAGE_KEY || e.newValue == null) return;
+      const theirs = parseState(e.newValue);
+      setState((s) => ({ ...theirs, active: s.active }));
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const updateLevel = useCallback((sliceIndex, next) => {
     setState((s) => {
       const current = s.scores[s.active];
@@ -72,7 +84,7 @@ export default function App() {
   return (
     <div className="page" style={{ '--accent': wheel.ink, '--accent-fill': wheel.fill }}>
       <header className="site-header">
-        <a className="brand" href="https://www.neurodapt.au/" rel="noopener">
+        <a className="brand" href="https://www.neurodapt.au/" target="_top" rel="noopener">
           <img src={logoUrl} alt="NeuroDapt" width="115" height="79" />
         </a>
       </header>

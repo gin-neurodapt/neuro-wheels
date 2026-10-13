@@ -1,21 +1,16 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { LEVELS } from '../wheels/config.js';
-import { segmentPath, layoutLabels, LABEL_STYLES } from '../wheels/geometry.js';
+import { segmentPath, scoreArcPath, layoutLabels, namesFit } from '../wheels/geometry.js';
 import { ICON_PATHS, ICON_GRID } from '../wheels/icons.generated.js';
 import { toPercent } from '../wheels/scores.js';
 import { createMeasure } from '../wheels/measure.js';
 import { useFontsVersion } from '../hooks.js';
 
-// Names are drawn around the wheel only if they would be at least this big
-// on screen; otherwise the wheel shows icons and percentages, and the names
-// are read from the list underneath.
-export const MIN_NAME_PX = 12;
-
 const RINGS = Array.from({ length: LEVELS }, (_, i) => i + 1);
 
-// Would the wheel WITH names fit at a readable size? Uses the space the wheel
-// really gets: its column's width, and the screen height it may fill (CSS
-// caps the chart's width at that height × the drawing's width:height ratio).
+// Reads the space the wheel really gets: its column's width, and the screen
+// height it may fill. CSS caps the chart's width at that height × the
+// drawing's width:height ratio, so the height is that cap ÷ the ratio.
 function useNamesFit(areaRef, chartRef, full) {
   const [fits, setFits] = useState(false);
   useLayoutEffect(() => {
@@ -27,9 +22,7 @@ function useNamesFit(areaRef, chartRef, full) {
       const maxWidth = parseFloat(style.maxWidth);
       const ratio = parseFloat(style.getPropertyValue('--chart-ratio')) || 1;
       const heightBudget = Number.isFinite(maxWidth) ? maxWidth / ratio : Infinity;
-      const width = Math.min(area.clientWidth, heightBudget * (full.halfW / full.halfH));
-      const scale = width / (2 * full.halfW);
-      setFits(scale * LABEL_STYLES.full.name >= MIN_NAME_PX);
+      setFits(namesFit({ areaWidth: area.clientWidth, heightBudget, full }));
     };
     check();
     window.addEventListener('resize', check);
@@ -103,12 +96,29 @@ export function WheelChart({ wheel, levels, onTap }) {
               }),
             )}
           </g>
+          <g className="score-arcs" aria-hidden="true">
+            {wheel.slices.map((slice, i) => {
+              const d = scoreArcPath(i, levels[i], count);
+              return d ? (
+                <path
+                  key={`${wheel.id}-arc-${i}`}
+                  d={d}
+                  fill="none"
+                  stroke={wheel.ink}
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  vectorEffect="non-scaling-stroke"
+                  data-slice={i}
+                />
+              ) : null;
+            })}
+          </g>
           <g className="labels" aria-hidden="true">
             {labels.map((label, i) => {
               const slice = wheel.slices[i];
               const d = ICON_PATHS[slice.icon];
               return (
-                <g key={`${wheel.id}-${i}`}>
+                <g key={`${wheel.id}-${i}`} data-slice={i} data-anchor={label.anchor}>
                   {d && (
                     <path
                       d={d}

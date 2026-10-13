@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within, fireEvent } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, within, fireEvent, act } from '@testing-library/react';
 import App from '../src/App.jsx';
-import { STORAGE_KEY } from '../src/wheels/storage.js';
+import { STORAGE_KEY, serializeState, initialState } from '../src/wheels/storage.js';
 
 function segment(container, slice, level) {
   return container.querySelector(`path.segment[data-slice="${slice}"][data-level="${level}"]`);
@@ -12,6 +12,14 @@ function rowValue(name) {
   return within(row).getByText(/%$/, { selector: 'output' }).textContent;
 }
 
+// jsdom lays nothing out, so every element is 0px wide. Give the wheel's
+// column a width to see what each screen size gets.
+function withColumnWidth(px) {
+  return vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(px);
+}
+
+afterEach(() => vi.restoreAllMocks());
+
 describe('the wheel page', () => {
   it('scores an area when a ring is tapped, and clears it when tapped again', () => {
     const { container } = render(<App />);
@@ -19,9 +27,11 @@ describe('the wheel page', () => {
     expect(rowValue('Family')).toBe('60%');
     expect(segment(container, 0, 3).getAttribute('fill')).toBe('#B2E5DD');
     expect(segment(container, 0, 4).getAttribute('fill')).toBe('#ffffff');
+    expect(container.querySelector('.score-arcs path[data-slice="0"]')).not.toBe(null);
 
     fireEvent.click(segment(container, 0, 3));
     expect(rowValue('Family')).toBe('0%');
+    expect(container.querySelector('.score-arcs path[data-slice="0"]')).toBe(null);
   });
 
   it('lowers the score when a lower ring is tapped', () => {
@@ -42,32 +52,76 @@ describe('the wheel page', () => {
     expect(screen.getByRole('button', { name: 'Lower Finance' }).disabled).toBe(true);
   });
 
+  it('tells screen readers what changed, once', () => {
+    const { container } = render(<App />);
+    fireEvent.click(segment(container, 0, 3));
+    const status = container.querySelector('.scores [role="status"]');
+    expect(status.textContent).toBe('Family 60%');
+    fireEvent.click(screen.getByRole('button', { name: 'Raise Purpose' }));
+    expect(status.textContent).toBe('Purpose 20%');
+    expect(container.querySelectorAll('output[aria-live]')).toHaveLength(0);
+  });
+
   it('keeps each wheel’s scores separate', () => {
     const { container } = render(<App />);
     fireEvent.click(segment(container, 0, 4));
     fireEvent.click(screen.getByRole('button', { name: 'Business' }));
-    expect(screen.getByRole('heading', { level: 1 })).toHaveProperty('textContent', 'Wheel of Business');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
     expect(rowValue('Profit Margin')).toBe('0%');
     expect(window.location.hash).toBe('#business');
     fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Family')).toBe('80%');
   });
 
-  it('remembers scores on this device across a reload', () => {
+  it('remembers scores and the open wheel across a reload', () => {
     const first = render(<App />);
     fireEvent.click(segment(first.container, 2, 5));
+    fireEvent.click(screen.getByRole('button', { name: 'Business' }));
     first.unmount();
-    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY)).scores.life[2]).toBe(5);
+    window.history.replaceState(null, '', '/');
 
     render(<App />);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
+    fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Purpose')).toBe('100%');
   });
 
   it('opens the wheel named in the address', () => {
     window.history.replaceState(null, '', '/#relationships');
     render(<App />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveProperty('textContent', 'Wheel of Relationships');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Relationships');
     expect(screen.getByRole('button', { name: 'Relationships' }).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('follows the address when it changes', () => {
+    render(<App />);
+    act(() => {
+      window.history.replaceState(null, '', '/#business');
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    });
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
+  });
+
+  it('takes scores saved by another open tab, keeps its own wheel, and does not wipe them on its next change', () => {
+    const { container } = render(<App />);
+    fireEvent.click(segment(container, 0, 5)); // this tab: Life / Family 100%
+    fireEvent.click(screen.getByRole('button', { name: 'Business' })); // then opens Business
+
+    // The other tab, on Life, scores Relationship 40% (it saw Family too).
+    const theirs = initialState();
+    theirs.scores.life[0] = 5;
+    theirs.scores.life[1] = 2;
+    const value = serializeState(theirs);
+    window.localStorage.setItem(STORAGE_KEY, value);
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue: value }));
+    });
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
+
+    fireEvent.click(segment(container, 0, 3)); // this tab scores Profit Margin 60%
+    const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
+    expect(saved.scores.business[0]).toBe(3);
+    expect(saved.scores.life.slice(0, 2)).toEqual([5, 2]);
   });
 
   it('resets one wheel only after confirming, leaving the others', () => {
@@ -76,12 +130,11 @@ describe('the wheel page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Business' }));
     fireEvent.click(segment(container, 0, 5));
 
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
+    vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
     fireEvent.click(screen.getByRole('button', { name: /Reset wheel/ }));
     expect(rowValue('Profit Margin')).toBe('100%');
     fireEvent.click(screen.getByRole('button', { name: /Reset wheel/ }));
     expect(rowValue('Profit Margin')).toBe('0%');
-    confirm.mockRestore();
 
     fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Family')).toBe('40%');
@@ -92,9 +145,8 @@ describe('the wheel page', () => {
     fireEvent.click(segment(container, 0, 2));
     fireEvent.click(screen.getByRole('button', { name: 'Business' }));
     fireEvent.click(segment(container, 0, 5));
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     fireEvent.click(screen.getByRole('button', { name: 'Reset all' }));
-    confirm.mockRestore();
     expect(rowValue('Profit Margin')).toBe('0%');
     fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Family')).toBe('0%');
@@ -111,5 +163,37 @@ describe('the wheel page', () => {
     const { container } = render(<App />);
     fireEvent.click(segment(container, 7, 1));
     expect(container.querySelector('svg[role="img"] title').textContent).toContain('Health & Fitness 20%');
+  });
+});
+
+describe('names around the wheel', () => {
+  it('shows names around the wheel on a wide screen', () => {
+    withColumnWidth(1000);
+    const { container } = render(<App />);
+    const svg = container.querySelector('.chart svg');
+    expect(svg.dataset.mode).toBe('full');
+    const names = [...container.querySelectorAll('.label-name')].map((t) => t.textContent);
+    expect(names).toContain('Family');
+    expect(names).toContain('& Fitness');
+    // Right-hand slices read outwards from the left, left-hand ones from the right.
+    expect(container.querySelector('.labels g[data-slice="0"]').dataset.anchor).toBe('start');
+    expect(container.querySelector('.labels g[data-slice="7"]').dataset.anchor).toBe('end');
+  });
+
+  it('shows icons and percentages only on a phone', () => {
+    withColumnWidth(390);
+    const { container } = render(<App />);
+    expect(container.querySelector('.chart svg').dataset.mode).toBe('compact');
+    expect(container.querySelectorAll('.label-name')).toHaveLength(0);
+    expect(container.querySelectorAll('.label-value')).toHaveLength(8);
+  });
+
+  it('does not move or resize the wheel when a score changes', () => {
+    withColumnWidth(1000);
+    const { container } = render(<App />);
+    const svg = container.querySelector('.chart svg');
+    const before = svg.getAttribute('viewBox');
+    for (let i = 0; i < 8; i++) fireEvent.click(segment(container, i, 5));
+    expect(svg.getAttribute('viewBox')).toBe(before);
   });
 });

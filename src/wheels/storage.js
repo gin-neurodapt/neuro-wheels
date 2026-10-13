@@ -2,12 +2,19 @@
 // reload or an accidental pull-to-refresh does not lose them. Nothing is ever
 // sent anywhere. Every read is validated: stored data is treated as untrusted
 // and anything malformed falls back to an empty wheel.
+//
+// The scores and the open wheel are kept under separate keys. Two open tabs
+// share the scores (each follows the other's changes through the browser's
+// "storage" event) but each keeps its own open wheel — if the open wheel were
+// stored with the scores, two tabs on different wheels would keep re-saving
+// over each other.
 
 import { WHEELS, DEFAULT_WHEEL_ID, findWheel } from './config.js';
 import { emptyLevels, isValidLevel } from './scores.js';
 import { cleanLabel } from './filename.js';
 
 export const STORAGE_KEY = 'neurodapt-wheels:v2';
+export const ACTIVE_KEY = 'neurodapt-wheels:v2:active';
 
 export function initialState(wheels = WHEELS) {
   return {
@@ -17,6 +24,7 @@ export function initialState(wheels = WHEELS) {
   };
 }
 
+// Scores and label from a stored string. `active` is not part of it.
 export function parseState(raw, wheels = WHEELS) {
   const state = initialState(wheels);
   let data;
@@ -27,9 +35,6 @@ export function parseState(raw, wheels = WHEELS) {
   }
   if (!data || typeof data !== 'object') return state;
 
-  if (typeof data.active === 'string' && wheels.some((w) => w.id === data.active)) {
-    state.active = data.active;
-  }
   if (data.scores && typeof data.scores === 'object') {
     for (const wheel of wheels) {
       const levels = data.scores[wheel.id];
@@ -42,22 +47,40 @@ export function parseState(raw, wheels = WHEELS) {
   return state;
 }
 
-export function loadState(storage, wheels = WHEELS) {
+export function serializeState(state) {
+  return JSON.stringify({ v: 2, scores: state.scores, label: state.label });
+}
+
+function read(storage, key) {
   try {
-    const raw = storage?.getItem(STORAGE_KEY);
-    return raw ? parseState(raw, wheels) : initialState(wheels);
+    return storage?.getItem(key) ?? null;
   } catch {
-    return initialState(wheels);
+    return null;
   }
 }
 
-export function saveState(storage, state) {
+function write(storage, key, value) {
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify({ v: 2, active: state.active, scores: state.scores, label: state.label }));
+    // Only write what changed: an unchanged write would still wake every
+    // other open tab.
+    if (storage && storage.getItem(key) !== value) storage.setItem(key, value);
   } catch {
     // Private browsing or storage full: the page still works, it just will
     // not remember the scores.
   }
+}
+
+export function loadState(storage, wheels = WHEELS) {
+  const raw = read(storage, STORAGE_KEY);
+  const state = raw ? parseState(raw, wheels) : initialState(wheels);
+  const active = read(storage, ACTIVE_KEY);
+  if (active && wheels.some((w) => w.id === active)) state.active = active;
+  return state;
+}
+
+export function saveState(storage, state) {
+  write(storage, STORAGE_KEY, serializeState(state));
+  write(storage, ACTIVE_KEY, state.active);
 }
 
 // "#business" in the address opens that wheel, so a link can go straight to it.

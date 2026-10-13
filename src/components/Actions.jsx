@@ -1,15 +1,28 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Icon } from './Icon.jsx';
-import { LABEL_MAX, cleanLabel, imageFileName } from '../wheels/filename.js';
-import { renderWheelImage, deliverImage, ensureFonts, loadImage } from '../wheels/exportImage.js';
+import { LABEL_MAX, cleanLabel, displayLabel, imageFileName } from '../wheels/filename.js';
+import {
+  renderWheelImage,
+  deliverImage,
+  ensureFonts,
+  loadImage,
+  prefersShare,
+  formatDate,
+} from '../wheels/exportImage.js';
+
+// What the image would show; a ready-made image is reused only if it matches.
+function imageKey(wheel, levels, label) {
+  return JSON.stringify([wheel.id, levels, displayLabel(label), formatDate(new Date())]);
+}
+
+const PREPARE_AFTER_MS = 600;
 
 export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAll, anyScores, logoUrl }) {
   const inputId = useId();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
+  const ready = useRef(null);
 
-  // Get the fonts and logo ready early: on phones the share sheet must open
-  // soon after the tap, so the image has to be quick to draw.
   useEffect(() => {
     ensureFonts();
     if (logoUrl) loadImage(logoUrl).catch(() => {});
@@ -17,19 +30,53 @@ export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAl
 
   useEffect(() => setStatus(''), [wheel.id]);
 
+  // Phones: the share sheet only opens if it is asked for straight after the
+  // tap, so draw the image shortly after each change, ready for that tap.
+  useEffect(() => {
+    if (!prefersShare()) return undefined;
+    let current = true;
+    const key = imageKey(wheel, levels, label);
+    const timer = setTimeout(() => {
+      renderWheelImage({ wheel, levels, label, logoUrl })
+        .then((blob) => {
+          if (current) ready.current = { key, blob };
+        })
+        .catch(() => {});
+    }, PREPARE_AFTER_MS);
+    return () => {
+      current = false;
+      clearTimeout(timer);
+    };
+  }, [wheel, levels, label, logoUrl]);
+
   async function download() {
-    setBusy(true);
+    const fileName = imageFileName(wheel.title, label);
+    const key = imageKey(wheel, levels, label);
+    let blob = ready.current?.key === key ? ready.current.blob : null;
     setStatus('');
+    if (!blob) {
+      setBusy(true);
+      try {
+        blob = await renderWheelImage({ wheel, levels, label, logoUrl });
+      } catch {
+        setStatus('Sorry, the image could not be made on this device.');
+        return;
+      } finally {
+        setBusy(false);
+      }
+    }
     try {
-      const blob = await renderWheelImage({ wheel, levels, label, logoUrl });
-      const fileName = imageFileName(wheel.title, label);
       const outcome = await deliverImage(blob, fileName);
-      if (outcome === 'downloaded') setStatus(`Saved “${fileName}”.`);
-      else if (outcome === 'shared') setStatus('Image ready.');
+      if (outcome === 'downloaded') {
+        const touch = window.matchMedia?.('(pointer: coarse)').matches;
+        setStatus(
+          `Downloading “${fileName}”.${touch ? ' If nothing appears, open this page in Safari or Chrome and try again.' : ''}`,
+        );
+      } else if (outcome === 'shared') {
+        setStatus('Image shared.');
+      }
     } catch {
-      setStatus('Sorry, the image could not be made on this device.');
-    } finally {
-      setBusy(false);
+      setStatus('Sorry, the image could not be saved on this device.');
     }
   }
 

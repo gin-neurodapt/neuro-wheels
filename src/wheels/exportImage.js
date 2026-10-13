@@ -3,7 +3,7 @@
 // so it looks the same whatever device it was made on.
 
 import { LEVELS } from './config.js';
-import { segmentPath, layoutLabels, valueFont, nameFont, FONT_FAMILY } from './geometry.js';
+import { segmentPath, scoreArcPath, layoutLabels, valueFont, nameFont, FONT_FAMILY } from './geometry.js';
 import { ICON_PATHS, ICON_GRID } from './icons.generated.js';
 import { toPercent, averagePercent } from './scores.js';
 import { displayLabel } from './filename.js';
@@ -86,6 +86,14 @@ function drawWheel(ctx, wheel, levels, area) {
       ctx.fill(path);
       ctx.stroke(path);
     }
+  }
+
+  ctx.strokeStyle = wheel.ink;
+  ctx.lineWidth = 5 / scale;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < count; i++) {
+    const arc = scoreArcPath(i, levels[i], count);
+    if (arc) ctx.stroke(new Path2D(arc));
   }
 
   labels.forEach((label, i) => {
@@ -207,12 +215,20 @@ export async function renderWheelImage({ wheel, levels, label, date = new Date()
   });
 }
 
-// Phones get the share sheet (so the image can go straight to Photos or a
-// message); everything else, or a phone where sharing fails, downloads it.
+// Phones and tablets get the share sheet (so the image can go straight to
+// Photos or a message); everything else downloads it.
+export function prefersShare() {
+  return Boolean(window.matchMedia?.('(pointer: coarse)').matches && typeof navigator.canShare === 'function');
+}
+
+// Hands the image to the person. Phones get the share sheet; if sharing is
+// unavailable or refused (other than the person cancelling), it downloads.
+//
+// navigator.share must be called promptly after the tap, so nothing here
+// awaits before it: the image is drawn beforehand (see Actions).
 export async function deliverImage(blob, fileName) {
   const file = typeof File === 'function' ? new File([blob], fileName, { type: 'image/png' }) : null;
-  const touch = window.matchMedia?.('(pointer: coarse)').matches;
-  if (touch && file && navigator.canShare?.({ files: [file] })) {
+  if (prefersShare() && file && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
       return 'shared';

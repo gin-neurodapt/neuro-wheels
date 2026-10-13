@@ -42,6 +42,17 @@ export function segmentPath(sliceIndex, level, sliceCount, levels = LEVELS, radi
   return `M${ox0} ${oy0}A${outer} ${outer} 0 ${large} 1 ${ox1} ${oy1}L${ix1} ${iy1}A${inner} ${inner} 0 ${large} 0 ${ix0} ${iy0}Z`;
 }
 
+// The outer edge of a slice's score: a darker arc at the scored ring, so the
+// shape of the wheel reads clearly even where the fill colour is pale.
+export function scoreArcPath(sliceIndex, level, sliceCount, levels = LEVELS, radius = WHEEL_RADIUS) {
+  if (level <= 0) return null;
+  const { start, end } = sliceAngles(sliceIndex, sliceCount);
+  const r = r2((radius / levels) * level);
+  const [x0, y0] = polar(r, start);
+  const [x1, y1] = polar(r, end);
+  return `M${x0} ${y0}A${r} ${r} 0 ${end - start > 180 ? 1 : 0} 1 ${x1} ${y1}`;
+}
+
 // ── Labels ──────────────────────────────────────────────────────────────────
 // Two label styles:
 //   full    — icon + percentage, with the area's name underneath (wide screens
@@ -156,4 +167,19 @@ export function layoutLabels(slices, mode, measure = estimateWidth) {
 
   const pad = 10;
   return { labels, halfW: Math.ceil(halfW + pad), halfH: Math.ceil(halfH + pad) };
+}
+
+// Names are drawn around the wheel only if they would be at least this big
+// on screen; otherwise the wheel shows icons and percentages, and the names
+// are read from the list underneath.
+export const MIN_NAME_PX = 12;
+
+// Would the wheel WITH names fit at a readable size?
+//   areaWidth    — the width of the wheel's column
+//   heightBudget — the most height the wheel may take (Infinity if unlimited)
+//   full         — layoutLabels(..., 'full')
+export function namesFit({ areaWidth, heightBudget, full }) {
+  const width = Math.min(areaWidth, heightBudget * (full.halfW / full.halfH));
+  const scale = width / (2 * full.halfW);
+  return scale * LABEL_STYLES.full.name >= MIN_NAME_PX;
 }
