@@ -3,9 +3,10 @@
 // so it looks the same whatever device it was made on.
 
 import { LEVELS } from './config.js';
-import { segmentPath, scoreArcPath, layoutLabels, valueFont, nameFont, FONT_FAMILY } from './geometry.js';
+import { segmentPath, scoreArcPath, layoutLabels, valueFont, nameFont, FONT_FAMILY, WHEEL_RADIUS } from './geometry.js';
+import { innerLineColour } from './colour.js';
 import { ICON_PATHS, ICON_GRID } from './icons.generated.js';
-import { toPercent, averagePercent } from './scores.js';
+import { toPercent } from './scores.js';
 import { displayLabel } from './filename.js';
 
 const WIDTH = 1600;
@@ -78,7 +79,7 @@ function drawWheel(ctx, wheel, levels, area) {
 
   ctx.lineWidth = 2 / scale;
   ctx.lineJoin = 'round';
-  ctx.strokeStyle = wheel.stroke;
+  ctx.strokeStyle = innerLineColour(wheel);
   for (let i = 0; i < count; i++) {
     for (let level = 1; level <= LEVELS; level++) {
       const path = new Path2D(segmentPath(i, level, count));
@@ -87,6 +88,12 @@ function drawWheel(ctx, wheel, levels, area) {
       ctx.stroke(path);
     }
   }
+
+  ctx.strokeStyle = wheel.stroke;
+  ctx.lineWidth = 3 / scale;
+  ctx.beginPath();
+  ctx.arc(0, 0, WHEEL_RADIUS, 0, 2 * Math.PI);
+  ctx.stroke();
 
   ctx.strokeStyle = wheel.ink;
   ctx.lineWidth = 5 / scale;
@@ -184,25 +191,9 @@ export async function renderWheelImage({ wheel, levels, label, date = new Date()
   ctx.font = `400 40px ${FONT_FAMILY}`;
   ctx.fillText(subtitle, WIDTH / 2, 388, WIDTH - 160);
 
-  drawWheel(ctx, wheel, levels, { x: 80, y: 430, w: WIDTH - 160, h: 1030 });
+  drawWheel(ctx, wheel, levels, { x: 80, y: 430, w: WIDTH - 160, h: 1100 });
 
-  ctx.textAlign = 'center';
-  ctx.fillStyle = TEXT;
-  ctx.font = `400 42px ${FONT_FAMILY}`;
-  const avgLabel = 'Average  ';
-  const avgValue = `${averagePercent(levels)}%`;
-  const labelW = ctx.measureText(avgLabel).width;
-  ctx.font = valueFont(46);
-  const valueW = ctx.measureText(avgValue).width;
-  const startX = (WIDTH - labelW - valueW) / 2;
-  ctx.textAlign = 'left';
-  ctx.font = `400 42px ${FONT_FAMILY}`;
-  ctx.fillText(avgLabel, startX, 1545);
-  ctx.fillStyle = wheel.ink;
-  ctx.font = valueFont(46);
-  ctx.fillText(avgValue, startX + labelW, 1545);
-
-  drawSummary(ctx, wheel, levels, 1620);
+  drawSummary(ctx, wheel, levels, 1610);
 
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';

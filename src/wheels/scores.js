@@ -17,11 +17,6 @@ export function toPercent(level) {
   return Math.round((level / LEVELS) * 100);
 }
 
-export function averagePercent(levels) {
-  if (!levels.length) return 0;
-  return Math.round(levels.reduce((sum, l) => sum + toPercent(l), 0) / levels.length);
-}
-
 export function emptyLevels(wheel) {
   return wheel.slices.map(() => 0);
 }

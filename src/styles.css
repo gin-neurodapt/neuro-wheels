@@ -1,7 +1,11 @@
 /* NeuroDapt Wheels — one layout that adapts to its space.
-   Phones: everything stacks in one column, the wheel uses the full width.
+   The header carries the logo, the wheel's name and the wheel picker (on a
+   phone held upright the picker gets its own thin row under the name).
+   Phones and upright tablets: one column, with the wheel sized so that it and
+   every area's score fit on the first screen together.
    Wide screens, and phones held sideways: the wheel on the left (kept in view
-   while the scores scroll), the scores and buttons on the right. */
+   while the scores scroll), the scores and buttons on the right.
+   Buttons are the same size on every device. */
 
 :root {
   --serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
@@ -16,9 +20,11 @@
   --accent: #177082;
   --accent-fill: #b2e5dd;
   --gutter: 16px;
-  --header-h: 64px;
-  /* Room above and below the wheel that it must leave free on the screen. */
-  --chart-chrome: 210px;
+  /* The header's full height at each layout. Keep in step with the header
+     rules below: the wheel's size is worked out from it. */
+  --header-total: 97px;
+  /* One score row: a 32px button plus 2px above and below, plus its line. */
+  --row-h: 37px;
   color-scheme: light;
 }
 
@@ -73,44 +79,22 @@ p {
   flex-direction: column;
 }
 
-.site-header {
-  height: var(--header-h);
-  display: flex;
-  align-items: center;
-  padding: 0 var(--gutter);
-  padding-left: max(var(--gutter), env(safe-area-inset-left));
-  border-bottom: 1px solid var(--line);
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  border-radius: 6px;
-}
-
-.brand img {
-  display: block;
-  height: 42px;
-  width: auto;
-}
-
 .main {
   flex: 1;
   width: 100%;
   max-width: 1320px;
   margin: 0 auto;
-  padding: 20px var(--gutter) 36px;
+  padding: 10px var(--gutter) 36px;
   padding-left: max(var(--gutter), env(safe-area-inset-left));
   padding-right: max(var(--gutter), env(safe-area-inset-right));
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    'intro'
+    'hint'
     'chart'
     'scores'
     'actions';
-  row-gap: 20px;
+  row-gap: 10px;
   animation: fade-in 0.4s ease-out both;
 }
 
@@ -134,37 +118,59 @@ p {
   margin-top: 8px;
 }
 
-/* ── Title and wheel picker ──────────────────────────────────────────────── */
+/* ── Header: logo, title, wheel picker ───────────────────────────────────── */
 
-.intro {
-  grid-area: intro;
+.site-header {
   display: grid;
-  gap: 14px;
-  justify-items: center;
-  text-align: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'brand title'
+    'picker picker';
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+  padding: 6px var(--gutter) 8px;
+  padding-left: max(var(--gutter), env(safe-area-inset-left));
+  padding-right: max(var(--gutter), env(safe-area-inset-right));
+  border-bottom: 1px solid var(--line);
 }
 
-.intro h1 {
+.brand {
+  grid-area: brand;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  border-radius: 6px;
+}
+
+.brand img {
+  display: block;
+  height: 34px;
+  width: auto;
+}
+
+/* The wheel's name fills the header beside the logo: sized so the longest
+   ("Wheel of Relationships") fits on one line on any phone. */
+.site-title {
+  grid-area: title;
+  min-width: 0;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(2rem, 1.5rem + 2.2vw, 2.9rem);
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  font-size: clamp(1.2rem, 0.3rem + 5vw, 1.9rem);
+  line-height: 1.15;
+  letter-spacing: 0.005em;
   color: #3b4245;
-}
-
-.hint {
-  max-width: 34em;
-  color: var(--muted);
-  font-size: 0.95rem;
+  text-wrap: balance;
 }
 
 .picker {
+  grid-area: picker;
   display: flex;
-  width: 100%;
-  max-width: 460px;
-  padding: 4px;
-  gap: 4px;
+  min-width: 0;
+  padding: 3px;
+  gap: 2px;
   border-radius: 999px;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -175,14 +181,15 @@ p {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 44px;
-  padding: 0 clamp(8px, 3vw, 18px);
+  min-height: 28px;
+  padding: 0 12px;
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
   font-weight: 500;
-  font-size: clamp(0.9rem, 0.8rem + 0.6vw, 1rem);
+  font-size: 0.85rem;
+  line-height: 1.2;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -200,6 +207,31 @@ p {
   }
 }
 
+/* ── Hint ────────────────────────────────────────────────────────────────── */
+
+.hint {
+  grid-area: hint;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+/* "Tap" on touch screens, "Click" elsewhere (the same test as the download). */
+.on-touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .on-touch {
+    display: inline;
+  }
+
+  .on-mouse {
+    display: none;
+  }
+}
+
 /* ── The wheel ───────────────────────────────────────────────────────────── */
 
 .chart-area {
@@ -207,13 +239,17 @@ p {
   min-width: 0;
 }
 
-/* As large as the column allows, but no taller than the screen — except on
-   very short screens (a phone held sideways, or a page zoomed right in),
-   where it keeps a usable size and the page scrolls instead. */
+/* One column: as large as the column allows, but small enough that the whole
+   list of scores still fits on the first screen under it. --chart-chrome is
+   everything else on that screen: the header, the hint, the score rows, and
+   the gaps between them. On a very short screen it keeps a usable size and
+   the page scrolls instead. */
 .chart {
+  --chart-chrome: calc(var(--header-total) + var(--rows, 8) * var(--row-h) + 60px);
+  --chart-min: 180px;
   width: 100%;
-  max-width: max(280px, calc((100vh - var(--chart-chrome)) * var(--chart-ratio, 1.15)));
-  max-width: max(280px, calc((100svh - var(--chart-chrome)) * var(--chart-ratio, 1.15)));
+  max-width: max(var(--chart-min), calc((100vh - var(--chart-chrome)) * var(--chart-ratio, 1.15)));
+  max-width: max(var(--chart-min), calc((100svh - var(--chart-chrome)) * var(--chart-ratio, 1.15)));
   margin: 0 auto;
 }
 
@@ -229,12 +265,18 @@ p {
   -webkit-tap-highlight-color: transparent;
 }
 
+.rim,
 .score-arcs {
   pointer-events: none;
 }
 
 .chart text {
   font-family: var(--sans);
+}
+
+.label {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .label-value {
@@ -261,59 +303,80 @@ p {
   container-type: inline-size;
 }
 
-.scores-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
-}
-
-.scores-head h2 {
-  font-family: var(--serif);
-  font-weight: 500;
-  font-size: 1.45rem;
-  color: #3b4245;
-}
-
-.average {
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.average strong {
-  color: var(--accent);
-  font-size: 1.15rem;
-  font-variant-numeric: tabular-nums;
-}
-
 .score-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  border-top: 1px solid var(--line);
 }
 
 .score-row {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+/* The area's icon and name: a button that opens its description. */
+.area {
+  display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 0 5px 2px;
-  border-bottom: 1px solid var(--line);
+  min-width: 0;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 4px 0 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .score-icon {
   display: block;
+  flex: none;
   color: var(--accent);
 }
 
 .score-name {
+  min-width: 0;
   font-size: 1rem;
-  line-height: 1.25;
+  line-height: 1.2;
   overflow-wrap: break-word;
   -webkit-hyphens: auto;
   hyphens: auto;
+}
+
+.area-caret {
+  display: block;
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+
+.area[aria-expanded='true'] .area-caret {
+  transform: rotate(180deg);
+}
+
+@media (hover: hover) {
+  .area:hover .score-name {
+    color: var(--accent);
+  }
+}
+
+.about {
+  grid-column: 1 / -1;
+  margin: 2px 0 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  background: color-mix(in srgb, var(--accent-fill) 24%, #fff);
+  font-size: 0.92rem;
+  line-height: 1.45;
 }
 
 .stepper {
@@ -325,8 +388,8 @@ p {
 .step {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 1px solid var(--field);
   border-radius: 50%;
@@ -348,26 +411,54 @@ p {
   }
 }
 
-/* A very narrow scores column (a phone held sideways): the buttons go under
-   the name, so long names like "Responsibilities" are not split mid-word. */
-@container (max-width: 290px) {
-  .score-row {
-    grid-template-columns: 28px minmax(0, 1fr);
-    row-gap: 2px;
-    padding-block: 8px;
-  }
-
-  .stepper {
-    grid-column: 2;
-  }
-}
-
 .score-value {
-  min-width: 3.4em;
+  min-width: 3.2em;
   text-align: center;
   font-weight: 700;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
+}
+
+/* A very narrow scores column (a phone held sideways): the buttons go under
+   the name, so long names like "Responsibilities" are not split mid-word. */
+@container (max-width: 290px) {
+  .score-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2px;
+    padding-block: 6px;
+  }
+
+  .stepper {
+    padding-left: 34px;
+  }
+}
+
+/* The description card shown while a mouse points at an area (AreaCard.jsx). */
+.area-card {
+  position: fixed;
+  z-index: 10;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 16px));
+  padding: 10px 14px 12px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(20, 40, 50, 0.16);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  pointer-events: none;
+  animation: fade-in 0.12s ease-out both;
+}
+
+.area-card-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 /* ── Save and reset ──────────────────────────────────────────────────────── */
@@ -377,6 +468,7 @@ p {
   display: grid;
   gap: 12px;
   align-content: start;
+  margin-top: 4px;
 }
 
 .save-image {
@@ -412,8 +504,8 @@ p {
 /* 17px keeps iPhones from zooming the page when the box is tapped. */
 .field input {
   width: 100%;
-  min-height: 48px;
-  padding: 0 14px;
+  min-height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--field);
   border-radius: 10px;
   background: #fff;
@@ -433,16 +525,20 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 48px;
-  padding: 0 16px;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 12px;
   border-radius: 10px;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.2;
   text-align: center;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+.btn svg {
+  flex: none;
 }
 
 .btn-primary {
@@ -456,10 +552,18 @@ p {
   cursor: progress;
 }
 
-.btn-quiet {
-  border: 1px solid var(--field);
-  background: #fff;
-  color: var(--text);
+/* The resets are soft on purpose: a pale wash and outline, yellow for this
+   wheel, red for every wheel. Their text stays dark enough to read. */
+.btn-reset-wheel {
+  border: 1px solid rgba(204, 153, 0, 0.55);
+  background: rgba(245, 196, 40, 0.12);
+  color: #6b5000;
+}
+
+.btn-reset-all {
+  border: 1px solid rgba(204, 51, 51, 0.45);
+  background: rgba(230, 60, 60, 0.07);
+  color: #a32b2b;
 }
 
 @media (hover: hover) {
@@ -467,9 +571,12 @@ p {
     filter: brightness(1.08);
   }
 
-  .btn-quiet:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+  .btn-reset-wheel:hover {
+    background: rgba(245, 196, 40, 0.22);
+  }
+
+  .btn-reset-all:hover {
+    background: rgba(230, 60, 60, 0.13);
   }
 }
 
@@ -489,65 +596,87 @@ p {
 /* ── Phones ──────────────────────────────────────────────────────────────── */
 
 @media (max-width: 599px) {
-  :root {
-    --header-h: 56px;
-  }
-
-  .brand img {
-    height: 36px;
-  }
-
-  .main {
-    padding-top: 16px;
-  }
-
   /* Let the wheel use the full screen width; its labels carry their own
      margin. */
   .chart-area {
     margin-inline: calc(-1 * var(--gutter) + 4px);
   }
-
-  .intro {
-    gap: 12px;
-  }
-
-  .hint {
-    font-size: 0.9rem;
-  }
 }
 
+/* The narrowest phones: tighter spacing in the score rows, so a long word
+   like "Responsibilities" still fits beside the buttons. */
 @media (max-width: 359px) {
   :root {
     --gutter: 12px;
   }
 
-  .step {
-    width: 40px;
-    height: 40px;
+  .score-row {
+    column-gap: 4px;
+  }
+
+  .area {
+    gap: 8px;
   }
 
   .score-value {
-    min-width: 3em;
+    min-width: 2.8em;
+  }
+}
+
+/* ── The picker beside the title: wider screens, and phones held sideways ── */
+
+@media (min-width: 720px), (orientation: landscape) and (min-width: 560px) and (max-height: 560px) {
+  :root {
+    --header-total: 77px;
+  }
+
+  .site-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'brand title picker';
+    column-gap: 16px;
+    padding-block: 10px;
+  }
+
+  /* A bigger logo on tablets and computers. */
+  .brand {
+    min-height: 56px;
+  }
+
+  .brand img {
+    height: 56px;
+  }
+
+  .site-title {
+    padding-left: 16px;
+    font-size: clamp(1.5rem, 0.9rem + 1.4vw, 2.2rem);
+  }
+
+  .picker button {
+    flex: 0 0 auto;
+    padding: 0 14px;
   }
 }
 
 /* ── Two columns: wide screens, and phones held sideways ─────────────────── */
 
 @media (min-width: 960px), (orientation: landscape) and (min-width: 600px) and (max-height: 560px) {
-  :root {
-    --chart-chrome: calc(var(--header-h) + 40px);
-  }
-
   .main {
+    padding-top: 20px;
     grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
     grid-template-rows: auto auto 1fr;
     grid-template-areas:
-      'chart intro'
+      'chart hint'
       'chart scores'
       'chart actions';
     column-gap: clamp(24px, 3vw, 48px);
-    row-gap: 22px;
+    row-gap: 14px;
     align-items: start;
+  }
+
+  /* The wheel only has to leave room for the header now. */
+  .chart {
+    --chart-chrome: calc(var(--header-total) + 40px);
+    --chart-min: 280px;
   }
 
   .chart-area {
@@ -556,26 +685,13 @@ p {
     align-self: start;
   }
 
-  .intro {
-    justify-items: start;
+  .hint {
     text-align: left;
-  }
-
-  .picker {
-    max-width: none;
   }
 }
 
 /* Phones held sideways: less height, so tighten everything up. */
 @media (orientation: landscape) and (max-height: 560px) {
-  :root {
-    --header-h: 52px;
-  }
-
-  .brand img {
-    height: 34px;
-  }
-
   .main {
     padding-top: 12px;
   }
@@ -583,42 +699,42 @@ p {
   .chart-area {
     top: 12px;
   }
+}
 
-  .intro h1 {
-    font-size: 1.8rem;
+/* ...including the one-row header (from 560px wide; narrower, the header
+   keeps its phone layout). */
+@media (orientation: landscape) and (min-width: 560px) and (max-height: 560px) {
+  :root {
+    --header-total: 49px;
+  }
+
+  .site-header {
+    padding-block: 4px;
+  }
+
+  .brand {
+    min-height: 40px;
+  }
+
+  .brand img {
+    height: 32px;
+  }
+
+  .site-title {
+    font-size: 1.2rem;
+  }
+
+  .picker button {
+    padding: 0 10px;
+    font-size: 0.8rem;
   }
 }
 
 /* ...and when they get two columns, split the width evenly so the wheel is
-   not squeezed, and make the right-hand column's contents a little smaller. */
+   not squeezed. */
 @media (orientation: landscape) and (min-width: 600px) and (max-height: 560px) {
   .main {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .picker button {
-    padding: 0 8px;
-    font-size: 0.9rem;
-  }
-
-  .step {
-    width: 40px;
-    height: 40px;
-  }
-
-  .score-value {
-    min-width: 3em;
-  }
-}
-
-@media (pointer: fine) {
-  .step {
-    width: 36px;
-    height: 36px;
-  }
-
-  .score-row {
-    padding-block: 3px;
   }
 }
 
@@ -639,17 +755,19 @@ p {
     animation: none;
   }
 
-  .segment {
+  .segment,
+  .area-caret {
     transition: none;
   }
 }
 
 @media print {
-  .site-header,
   .actions,
   .stepper button,
   .picker,
-  .hint {
+  .hint,
+  .area-caret,
+  .area-card {
     display: none;
   }
 }

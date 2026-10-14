@@ -131,25 +131,97 @@ describe('the wheel page', () => {
     fireEvent.click(segment(container, 0, 5));
 
     vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
-    fireEvent.click(screen.getByRole('button', { name: /Reset wheel/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset this wheel' }));
     expect(rowValue('Profit Margin')).toBe('100%');
-    fireEvent.click(screen.getByRole('button', { name: /Reset wheel/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset this wheel' }));
     expect(rowValue('Profit Margin')).toBe('0%');
 
     fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Family')).toBe('40%');
   });
 
-  it('resets every wheel with Reset all', () => {
+  it('resets every wheel with Reset all wheels', () => {
     const { container } = render(<App />);
     fireEvent.click(segment(container, 0, 2));
     fireEvent.click(screen.getByRole('button', { name: 'Business' }));
     fireEvent.click(segment(container, 0, 5));
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    fireEvent.click(screen.getByRole('button', { name: 'Reset all' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Reset all wheels' }));
     expect(rowValue('Profit Margin')).toBe('0%');
     fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Family')).toBe('0%');
+  });
+
+  it('puts the wheel’s name and the wheel picker in the header, and shows no average', () => {
+    render(<App />);
+    const header = screen.getByRole('banner');
+    expect(within(header).getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Life');
+    expect(within(header).getByRole('group', { name: 'Choose a wheel' })).toBeTruthy();
+    fireEvent.click(within(header).getByRole('button', { name: 'Relationships' }));
+    expect(within(header).getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Relationships');
+    expect(document.body.textContent).not.toMatch(/average/i);
+  });
+
+  it('opens an area’s description when its name is tapped, one at a time', () => {
+    render(<App />);
+    const family = screen.getByRole('button', { name: 'Family' });
+    const purpose = screen.getByRole('button', { name: 'Purpose' });
+    const about = (button) => document.getElementById(button.getAttribute('aria-controls'));
+    expect(family.getAttribute('aria-expanded')).toBe('false');
+    expect(about(family).hidden).toBe(true);
+
+    fireEvent.click(family);
+    expect(family.getAttribute('aria-expanded')).toBe('true');
+    expect(about(family).hidden).toBe(false);
+    expect(about(family).textContent).toMatch(/^The people you call family/);
+
+    fireEvent.click(purpose);
+    expect(about(purpose).hidden).toBe(false);
+    expect(about(family).hidden).toBe(true);
+
+    fireEvent.click(purpose);
+    expect(about(purpose).hidden).toBe(true);
+  });
+
+  it('opens the same description when the area’s label on the wheel is tapped, without scoring it', () => {
+    const { container } = render(<App />);
+    fireEvent.click(container.querySelector('.labels g[data-slice="5"]'));
+    const finance = screen.getByRole('button', { name: 'Finance' });
+    expect(finance.getAttribute('aria-expanded')).toBe('true');
+    expect(rowValue('Finance')).toBe('0%');
+  });
+
+  it('closes the description when another wheel is opened', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Family' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Business' }));
+    expect([...document.querySelectorAll('.about')].every((p) => p.hidden)).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Life' }));
+    expect([...document.querySelectorAll('.about')].every((p) => p.hidden)).toBe(true);
+  });
+
+  it('shows a description card while a mouse points at an area, and not for a finger', () => {
+    vi.useFakeTimers();
+    const { container } = render(<App />);
+    const label = container.querySelector('.labels g[data-slice="2"]');
+    fireEvent.pointerEnter(label, { pointerType: 'touch' });
+    act(() => vi.advanceTimersByTime(1000));
+    expect(container.querySelector('.area-card')).toBe(null);
+
+    fireEvent.pointerEnter(label, { pointerType: 'mouse' });
+    expect(container.querySelector('.area-card')).toBe(null); // not straight away
+    act(() => vi.advanceTimersByTime(250));
+    expect(container.querySelector('.area-card').textContent).toMatch(/^Purpose.*meaning and direction/);
+
+    fireEvent.pointerLeave(label, { pointerType: 'mouse' });
+    act(() => vi.advanceTimersByTime(10));
+    expect(container.querySelector('.area-card')).toBe(null);
+
+    // The list's names and percentages show it too.
+    fireEvent.pointerEnter(screen.getByRole('button', { name: 'Career' }), { pointerType: 'mouse' });
+    act(() => vi.advanceTimersByTime(250));
+    expect(container.querySelector('.area-card').textContent).toMatch(/^Career/);
+    vi.useRealTimers();
   });
 
   it('cleans the image name as it is typed', () => {
@@ -186,6 +258,14 @@ describe('names around the wheel', () => {
     expect(container.querySelector('.chart svg').dataset.mode).toBe('compact');
     expect(container.querySelectorAll('.label-name')).toHaveLength(0);
     expect(container.querySelectorAll('.label-value')).toHaveLength(8);
+  });
+
+  it('shows icons alone on a wheel too small for readable percentages', () => {
+    withColumnWidth(250);
+    const { container } = render(<App />);
+    expect(container.querySelector('.chart svg').dataset.mode).toBe('icons');
+    expect(container.querySelectorAll('.label-value')).toHaveLength(0);
+    expect(container.querySelectorAll('.labels .label path')).toHaveLength(8);
   });
 
   it('does not move or resize the wheel when a score changes', () => {

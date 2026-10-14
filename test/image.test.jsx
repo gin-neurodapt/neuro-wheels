@@ -65,7 +65,7 @@ describe('saving the image', () => {
 });
 
 describe('drawing the image', () => {
-  it('draws the title, label, date, every score and the average', async () => {
+  it('draws the title, label, date and every score, and no average', async () => {
     const calls = fakeCanvas();
     const wheel = WHEELS[0];
     const levels = [4, 2, 5, 3, 1, 4, 2, 0];
@@ -83,7 +83,8 @@ describe('drawing the image', () => {
       20: 2,
       0: 2,
     });
-    expect(count('53%')).toBe(1); // the average of 80,40,100,60,20,80,40,0
+    expect(count('53%')).toBe(0); // what the average of 80,40,100,60,20,80,40,0 would be
+    expect(calls.text.some((t) => /average/i.test(t))).toBe(false);
     for (const s of wheel.slices) expect(calls.text).toContain(s.name);
   });
 });

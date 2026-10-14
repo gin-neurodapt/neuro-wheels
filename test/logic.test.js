@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { WHEELS, UI_ICONS, LEVELS } from '../src/wheels/config.js';
 import { ICON_PATHS } from '../src/wheels/icons.generated.js';
-import { tapLevel, stepLevel, toPercent, averagePercent } from '../src/wheels/scores.js';
+import * as scores from '../src/wheels/scores.js';
+import { fadeToWhite, innerLineColour, INNER_LINE_FADE } from '../src/wheels/colour.js';
+import { placeCard } from '../src/components/AreaCard.jsx';
+
+const { tapLevel, stepLevel, toPercent } = scores;
 import {
   segmentPath,
   scoreArcPath,
   splitName,
   layoutLabels,
   namesFit,
+  labelMode,
+  MIN_VALUE_PX,
   polar,
   estimateWidth,
   valueFont,
@@ -43,6 +49,13 @@ function memoryStorage() {
   };
 }
 
+// Relative luminance (WCAG).
+function lum(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const lin = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
 describe('config', () => {
   it('has an icon drawing for every icon it names (run `npm run icons` if this fails)', () => {
     const names = [...WHEELS.flatMap((w) => w.slices.map((s) => s.icon)), ...UI_ICONS];
@@ -57,12 +70,19 @@ describe('config', () => {
     }
   });
 
+  it('gives every area a description to read', () => {
+    for (const w of WHEELS) {
+      for (const s of w.slices) {
+        expect(typeof s.about, `${w.id} ${s.name}`).toBe('string');
+        // A sentence or two: long enough to help, short enough for the card.
+        expect(s.about.length, `${w.id} ${s.name}`).toBeGreaterThan(30);
+        expect(s.about.length, `${w.id} ${s.name}`).toBeLessThanOrEqual(140);
+        expect(s.about, `${w.id} ${s.name}`).toMatch(/^[A-Z].*.$/);
+      }
+    }
+  });
+
   it('keeps each wheel’s text colour (ink) readable on white (WCAG AA, 4.5:1)', () => {
-    const lum = (hex) => {
-      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-      const lin = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-      return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-    };
     for (const w of WHEELS) {
       const ratio = 1.05 / (lum(w.ink) + 0.05);
       expect(ratio, `${w.id} ink ${w.ink}`).toBeGreaterThanOrEqual(4.5);
@@ -87,10 +107,30 @@ describe('scoring', () => {
     expect(stepLevel(2, 1)).toBe(3);
   });
 
-  it('shows 20% per ring and averages over every area', () => {
+  it('shows 20% per ring', () => {
     expect([0, 1, 2, 3, 4, 5].map(toPercent)).toEqual([0, 20, 40, 60, 80, 100]);
-    expect(averagePercent([5, 5, 0, 0, 0, 0, 0, 0])).toBe(25);
-    expect(averagePercent([3, 3, 3, 3, 3, 3, 3, 4])).toBe(63);
+  });
+
+  // The goal is an even wheel, not a full one, so no overall score is offered.
+  it('has no average', () => {
+    expect(Object.keys(scores).filter((k) => /aver|mean|total/i.test(k))).toEqual([]);
+  });
+});
+
+describe('wheel lines', () => {
+  it('fades a colour towards white', () => {
+    expect(fadeToWhite('#177082', 0)).toBe('#177082');
+    expect(fadeToWhite('#177082', 1)).toBe('#ffffff');
+    expect(fadeToWhite('#000000', 0.5)).toBe('#808080');
+  });
+
+  it('draws the inner lines much lighter than the rim, but still visible on white', () => {
+    expect(INNER_LINE_FADE).toBeGreaterThan(0.3);
+    for (const w of WHEELS) {
+      const inner = innerLineColour(w);
+      expect(lum(inner), w.id).toBeGreaterThan(lum(w.stroke) * 2);
+      expect(lum(inner), w.id).toBeLessThan(0.75);
+    }
   });
 });
 
@@ -184,6 +224,41 @@ describe('geometry', () => {
     });
   }
 
+  it('icon-only labels: the icon sits beyond the rim, on its slice’s side, clear of the others', () => {
+    for (const wheel of WHEELS) {
+      const { labels } = layoutLabels(wheel.slices, 'icons');
+      labels.forEach((label, i) => {
+        const { box, icon } = label;
+        expect(label.value, `${wheel.id} ${i}`).toBe(null);
+        expect(label.name).toEqual([]);
+        expect([icon.x, icon.y, icon.x + icon.size, icon.y + icon.size]).toEqual([box.left, box.top, box.right, box.bottom]);
+        const nx = Math.max(box.left, Math.min(0, box.right));
+        const ny = Math.max(box.top, Math.min(0, box.bottom));
+        expect(Math.hypot(nx, ny), `${wheel.id} ${i} rim`).toBeGreaterThan(WHEEL_RADIUS);
+        const mid = ((i + 0.5) * 360) / wheel.slices.length;
+        expect(Math.sign(box.left + box.right), `${wheel.id} ${i} side`).toBe(mid < 180 ? 1 : -1);
+        for (const other of labels.slice(i + 1)) {
+          const B = other.box;
+          expect(box.left < B.right && B.left < box.right && box.top < B.bottom && B.top < box.bottom).toBe(false);
+        }
+      });
+    }
+  });
+
+  it('picks the richest labels that stay readable: names, then percentages, then icons', () => {
+    const full = layoutLabels(WHEELS[1].slices, 'full');
+    const compact = layoutLabels(WHEELS[1].slices, 'compact');
+    const mode = (areaWidth, heightBudget = Infinity) => labelMode({ areaWidth, heightBudget, full, compact });
+    expect(mode(1200)).toBe('full');
+    expect(mode(390)).toBe('compact');
+    // The width at which the percentages come out at exactly MIN_VALUE_PX.
+    const threshold = (MIN_VALUE_PX / LABEL_STYLES.compact.value) * 2 * compact.halfW;
+    expect(mode(threshold + 1)).toBe('compact');
+    expect(mode(threshold - 1)).toBe('icons');
+    // A phone whose wheel is kept short so the list fits: icons only.
+    expect(mode(390, 210)).toBe('icons');
+  });
+
   it('shows names only when they would be at least 12px on screen', () => {
     const full = layoutLabels(WHEELS[0].slices, 'full');
     // The width at which names come out at exactly MIN_NAME_PX.
@@ -199,6 +274,31 @@ describe('geometry', () => {
     const heightAtThreshold = ((MIN_NAME_PX / LABEL_STYLES.full.name) * 2 * full.halfW * full.halfH) / full.halfW;
     expect(namesFit({ areaWidth: 1400, heightBudget: heightAtThreshold - 1, full })).toBe(false);
     expect(namesFit({ areaWidth: 1400, heightBudget: heightAtThreshold + 1, full })).toBe(true);
+  });
+});
+
+describe('the description card (mouse)', () => {
+  const viewport = { width: 1000, height: 800 };
+  const card = { width: 300, height: 120 };
+
+  it('goes under the thing pointed at, centred on it', () => {
+    const anchor = { left: 400, right: 500, top: 100, bottom: 140 };
+    expect(placeCard({ anchor, card, viewport })).toEqual({ left: 300, top: 148 });
+  });
+
+  it('goes above it when there is no room below', () => {
+    const anchor = { left: 400, right: 500, top: 700, bottom: 740 };
+    expect(placeCard({ anchor, card, viewport })).toEqual({ left: 300, top: 572 });
+  });
+
+  it('stays below when there is no room above either (it never goes off the top)', () => {
+    const anchor = { left: 400, right: 500, top: 60, bottom: 740 };
+    expect(placeCard({ anchor, card, viewport }).top).toBe(748);
+  });
+
+  it('is kept inside the window at either side', () => {
+    expect(placeCard({ anchor: { left: 0, right: 40, top: 100, bottom: 140 }, card, viewport }).left).toBe(8);
+    expect(placeCard({ anchor: { left: 960, right: 1000, top: 100, bottom: 140 }, card, viewport }).left).toBe(692);
   });
 });
 

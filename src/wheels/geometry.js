@@ -54,15 +54,18 @@ export function scoreArcPath(sliceIndex, level, sliceCount, levels = LEVELS, rad
 }
 
 // ── Labels ──────────────────────────────────────────────────────────────────
-// Two label styles:
+// Three label styles, the largest that reads well in the space:
 //   full    — icon + percentage, with the area's name underneath (wide screens
 //             and the downloaded image)
 //   compact — icon above the percentage only (phones; the names are listed
 //             under the wheel instead)
+//   icons   — the icon alone (a phone whose wheel is kept small so the whole
+//             list fits under it; the percentages are right there in the list)
 
 export const LABEL_STYLES = {
   full: { gap: 46, icon: 60, iconGap: 14, value: 50, name: 31, leading: 37, rowToName: 10 },
   compact: { gap: 22, icon: 62, iconGap: 6, value: 54 },
+  icons: { gap: 20, icon: 84 },
 };
 
 // The widest a percentage can be. Space is always reserved for it, so the
@@ -124,7 +127,13 @@ export function layoutLabels(slices, mode, measure = estimateWidth) {
     let box;
     let label;
 
-    if (mode === 'compact') {
+    if (mode === 'icons') {
+      const w = s.icon;
+      const reach = (w / 2) * (Math.abs(sin) + Math.abs(cos));
+      const [px, py] = polar(WHEEL_RADIUS + s.gap + reach, mid);
+      box = { left: px - w / 2, right: px + w / 2, top: py - w / 2, bottom: py + w / 2 };
+      label = { anchor: 'middle', icon: { x: box.left, y: box.top, size: s.icon }, value: null, name: [] };
+    } else if (mode === 'compact') {
       const w = Math.max(s.icon, valueWidth);
       // Room below the figures for the font's descent, so nothing is cut off.
       const h = s.icon + s.iconGap + s.value * 0.74 + s.value * 0.22;
@@ -179,7 +188,21 @@ export const MIN_NAME_PX = 12;
 //   heightBudget — the most height the wheel may take (Infinity if unlimited)
 //   full         — layoutLabels(..., 'full')
 export function namesFit({ areaWidth, heightBudget, full }) {
-  const width = Math.min(areaWidth, heightBudget * (full.halfW / full.halfH));
-  const scale = width / (2 * full.halfW);
-  return scale * LABEL_STYLES.full.name >= MIN_NAME_PX;
+  return shownScale({ areaWidth, heightBudget, layout: full }) * LABEL_STYLES.full.name >= MIN_NAME_PX;
+}
+
+// Percentages are drawn on the wheel only if they would be at least this big.
+export const MIN_VALUE_PX = 12;
+
+// Screen pixels per wheel unit, for a layout drawn as big as the space allows.
+function shownScale({ areaWidth, heightBudget, layout }) {
+  const width = Math.min(areaWidth, heightBudget * (layout.halfW / layout.halfH));
+  return width / (2 * layout.halfW);
+}
+
+// The richest label style that is still readable in the space.
+export function labelMode({ areaWidth, heightBudget, full, compact }) {
+  if (namesFit({ areaWidth, heightBudget, full })) return 'full';
+  const valuePx = shownScale({ areaWidth, heightBudget, layout: compact }) * LABEL_STYLES.compact.value;
+  return valuePx >= MIN_VALUE_PX ? 'compact' : 'icons';
 }

@@ -7,6 +7,7 @@ import { WheelPicker } from './components/WheelPicker.jsx';
 import { WheelChart } from './components/WheelChart.jsx';
 import { ScoreList } from './components/ScoreList.jsx';
 import { Actions } from './components/Actions.jsx';
+import { AreaCard, usePeek } from './components/AreaCard.jsx';
 
 function deviceStorage() {
   try {
@@ -79,28 +80,55 @@ export default function App() {
   );
   const onResetAll = useCallback(() => setState((s) => ({ ...initialState(), active: s.active, label: s.label })), []);
 
+  // Which area's description is open (one at a time, on the open wheel).
+  const [about, setAbout] = useState(null);
+  const openArea = about?.wheelId === wheel.id ? about.index : null;
+  const onAbout = useCallback(
+    (i) => setAbout((a) => (a?.wheelId === wheel.id && a.index === i ? null : { wheelId: wheel.id, index: i })),
+    [wheel.id],
+  );
+  // Another wheel closes it (so coming back to this one finds it closed too).
+  useEffect(() => setAbout(null), [wheel.id]);
+
+  // The description card shown while a mouse points at an area.
+  const { peek, show: onPeek, hide: hidePeek } = usePeek();
+  useEffect(() => hidePeek(), [wheel.id, hidePeek]);
+  // Not over a list row whose description is already open under it.
+  const card = peek && !(peek.source === 'list' && peek.index === openArea) ? peek : null;
+
   const anyScores = Object.values(state.scores).some((l) => l.some(Boolean));
 
   return (
-    <div className="page" style={{ '--accent': wheel.ink, '--accent-fill': wheel.fill }}>
+    <div
+      className="page"
+      style={{ '--accent': wheel.ink, '--accent-fill': wheel.fill, '--rows': wheel.slices.length }}
+    >
       <header className="site-header">
         <a className="brand" href="https://www.neurodapt.au/" target="_top" rel="noopener">
           <img src={logoUrl} alt="NeuroDapt" width="115" height="79" />
         </a>
+        <h1 className="site-title">{wheel.title}</h1>
+        <WheelPicker wheels={WHEELS} activeId={wheel.id} onChoose={onChoose} />
       </header>
 
       <main className="main">
-        <div className="intro">
-          <h1>{wheel.title}</h1>
-          <WheelPicker wheels={WHEELS} activeId={wheel.id} onChoose={onChoose} />
-          <p className="hint">
-            Choose a ring to score each area: the outer ring is 100%. Choose the same ring again to clear it.
-          </p>
-        </div>
+        <p className="hint">
+          <span className="on-touch">Tap a ring to score an area, and tap it again to clear it.</span>
+          <span className="on-mouse">
+            Click a ring to score an area, and click it again to clear it. Point at an area to read about it.
+          </span>
+        </p>
 
-        <WheelChart wheel={wheel} levels={levels} onTap={onTap} />
+        <WheelChart wheel={wheel} levels={levels} onTap={onTap} onAbout={onAbout} onPeek={onPeek} />
 
-        <ScoreList wheel={wheel} levels={levels} onStep={onStep} />
+        <ScoreList
+          wheel={wheel}
+          levels={levels}
+          onStep={onStep}
+          openArea={openArea}
+          onAbout={onAbout}
+          onPeek={onPeek}
+        />
 
         <Actions
           wheel={wheel}
@@ -113,6 +141,8 @@ export default function App() {
           logoUrl={logoUrl}
         />
       </main>
+
+      <AreaCard wheel={wheel} peek={card} />
 
       <footer className="site-footer">
         <p>Your scores stay on this device. Nothing is sent anywhere.</p>

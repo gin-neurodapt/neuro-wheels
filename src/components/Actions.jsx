@@ -71,12 +71,13 @@ export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAl
         </p>
       </section>
       <div className="actions-row">
-        <button type="button" className="btn btn-quiet" onClick={resetWheel}>
+        <button type="button" className="btn btn-reset-wheel" onClick={resetWheel}>
           <Icon name="arrow-counter-clockwise" size={18} />
-          Reset wheel
+          Reset this wheel
         </button>
-        <button type="button" className="btn btn-quiet" onClick={resetAll}>
-          Reset all
+        <button type="button" className="btn btn-reset-all" onClick={resetAll}>
+          <Icon name="arrows-counter-clockwise" size={18} />
+          Reset all wheels
         </button>
       </div>
     </div>

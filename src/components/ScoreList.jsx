@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icon } from './Icon.jsx';
 import { LEVELS } from '../wheels/config.js';
-import { toPercent, averagePercent } from '../wheels/scores.js';
+import { toPercent } from '../wheels/scores.js';
 
 // One message for screen readers per change ("Family 60%"), rather than every
 // percentage announcing itself.
@@ -27,27 +27,55 @@ function useAnnouncement(wheel, levels) {
   return message;
 }
 
-export function ScoreList({ wheel, levels, onStep }) {
+// Opening a description from the wheel can put it below the screen's edge:
+// bring it into view (no movement if it is already showing).
+function useRevealOpenArea(listRef, openArea) {
+  useEffect(() => {
+    if (openArea == null) return;
+    listRef.current?.querySelector(`[data-about="${openArea}"]`)?.scrollIntoView?.({ block: 'nearest' });
+  }, [listRef, openArea]);
+}
+
+export function ScoreList({ wheel, levels, onStep, openArea = null, onAbout, onPeek }) {
   const headingId = useId();
+  const listRef = useRef(null);
   const announcement = useAnnouncement(wheel, levels);
+  useRevealOpenArea(listRef, openArea);
+  // No heading on screen (the list explains itself), but screen readers
+  // still get one to jump to.
   return (
     <section className="scores" aria-labelledby={headingId}>
-      <div className="scores-head">
-        <h2 id={headingId}>Your scores</h2>
-        <p className="average">
-          Average <strong>{averagePercent(levels)}%</strong>
-        </p>
-      </div>
-      <ol className="score-list">
+      <h2 className="visually-hidden" id={headingId}>
+        Your scores
+      </h2>
+      <ol className="score-list" ref={listRef}>
         {wheel.slices.map((slice, i) => {
           const level = levels[i];
           const nameId = `${headingId}-${i}`;
+          const aboutId = `${headingId}-about-${i}`;
+          const open = openArea === i;
+          const peekHandlers = {
+            onPointerEnter: (e) => {
+              if (e.pointerType === 'mouse') onPeek?.(i, e.currentTarget, 'list');
+            },
+            onPointerLeave: () => onPeek?.(null),
+          };
           return (
             <li className="score-row" key={`${wheel.id}-${i}`}>
-              <Icon name={slice.icon} className="score-icon" size={26} />
-              <span className="score-name" id={nameId}>
-                {slice.name}
-              </span>
+              <button
+                type="button"
+                className="area"
+                aria-expanded={open}
+                aria-controls={aboutId}
+                onClick={() => onAbout?.(i)}
+                {...peekHandlers}
+              >
+                <Icon name={slice.icon} className="score-icon" size={24} />
+                <span className="score-name" id={nameId}>
+                  {slice.name}
+                </span>
+                <Icon name="caret-down" className="area-caret" size={14} />
+              </button>
               <div className="stepper" role="group" aria-labelledby={nameId}>
                 <button
                   type="button"
@@ -58,7 +86,9 @@ export function ScoreList({ wheel, levels, onStep }) {
                 >
                   <Icon name="minus" size={18} />
                 </button>
-                <output className="score-value">{toPercent(level)}%</output>
+                <output className="score-value" {...peekHandlers}>
+                  {toPercent(level)}%
+                </output>
                 <button
                   type="button"
                   className="step"
@@ -69,6 +99,9 @@ export function ScoreList({ wheel, levels, onStep }) {
                   <Icon name="plus" size={18} />
                 </button>
               </div>
+              <p className="about" id={aboutId} data-about={i} hidden={!open}>
+                {slice.about}
+              </p>
             </li>
           );
         })}
