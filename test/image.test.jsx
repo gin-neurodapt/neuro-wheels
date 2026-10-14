@@ -2,21 +2,38 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from '../src/App.jsx';
 import { WHEELS } from '../src/wheels/config.js';
-import { deliverImage, renderWheelImage } from '../src/wheels/exportImage.js';
+import { downloadImage, renderWheelImage } from '../src/wheels/exportImage.js';
 
 const blob = new Blob(['png'], { type: 'image/png' });
 
-function setTouch(isTouch) {
-  window.matchMedia = vi.fn((q) => ({ matches: isTouch && q.includes('coarse'), media: q }));
+function fakeCanvas() {
+  const calls = { text: [], strokes: 0 };
+  const ctx = new Proxy(
+    {
+      fillText: (t) => calls.text.push(String(t)),
+      measureText: (t) => ({ width: String(t).length * 10 }),
+      stroke: () => calls.strokes++,
+    },
+    { get: (target, key) => (key in target ? target[key] : () => {}), set: () => true },
+  );
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(ctx);
+  vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((cb) => cb(blob));
+  globalThis.Path2D = class {};
+  return calls;
 }
 
-function setShare({ canShare = true, share } = {}) {
-  navigator.canShare = vi.fn(() => canShare);
-  navigator.share = share;
+// jsdom never loads images; the logo "loads" at once.
+class InstantImage {
+  naturalWidth = 115;
+  naturalHeight = 79;
+  set src(_) {
+    queueMicrotask(() => this.onload());
+  }
 }
 
 let click;
 beforeEach(() => {
+  vi.stubGlobal('Image', InstantImage);
   URL.createObjectURL = vi.fn(() => 'blob:fake');
   URL.revokeObjectURL = vi.fn();
   click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
@@ -24,51 +41,23 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   vi.useRealTimers();
-  delete window.matchMedia;
-  delete navigator.canShare;
-  delete navigator.share;
 });
 
-describe('getting the image to the person', () => {
-  it('opens the share sheet on a phone', async () => {
-    setTouch(true);
-    const share = vi.fn(() => Promise.resolve());
-    setShare({ share });
-    await expect(deliverImage(blob, 'a.png')).resolves.toBe('shared');
-    expect(share).toHaveBeenCalledTimes(1);
-    expect(share.mock.calls[0][0].files[0].name).toBe('a.png');
-    expect(click).not.toHaveBeenCalled();
-  });
-
-  it('does nothing more when the person cancels the share sheet', async () => {
-    setTouch(true);
-    setShare({ share: vi.fn(() => Promise.reject(new DOMException('cancel', 'AbortError'))) });
-    await expect(deliverImage(blob, 'a.png')).resolves.toBe('cancelled');
-    expect(click).not.toHaveBeenCalled();
-  });
-
-  it('downloads instead when the phone refuses to share', async () => {
-    setTouch(true);
-    setShare({ share: vi.fn(() => Promise.reject(new DOMException('no', 'NotAllowedError'))) });
-    await expect(deliverImage(blob, 'a.png')).resolves.toBe('downloaded');
+describe('saving the image', () => {
+  it('downloads it under the given name', () => {
+    downloadImage(blob, 'NeuroDapt - Wheel of Life.png');
     expect(click).toHaveBeenCalledTimes(1);
-  });
-
-  it('downloads on a computer, without offering to share', async () => {
-    setTouch(false);
-    const share = vi.fn();
-    setShare({ share });
-    await expect(deliverImage(blob, 'NeuroDapt - Wheel of Life.png')).resolves.toBe('downloaded');
-    expect(share).not.toHaveBeenCalled();
     const anchor = click.mock.contexts[0];
     expect(anchor.download).toBe('NeuroDapt - Wheel of Life.png');
+    expect(anchor.href).toBe('blob:fake');
+    expect(anchor.isConnected).toBe(false);
   });
 
-  it('keeps the download link alive long enough for the browser to save it', async () => {
+  it('keeps the download link alive long enough for the browser to save it', () => {
     vi.useFakeTimers();
-    setTouch(false);
-    await deliverImage(blob, 'a.png');
+    downloadImage(blob, 'a.png');
     expect(URL.revokeObjectURL).not.toHaveBeenCalled();
     vi.advanceTimersByTime(60_000);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:fake');
@@ -76,22 +65,6 @@ describe('getting the image to the person', () => {
 });
 
 describe('drawing the image', () => {
-  function fakeCanvas() {
-    const calls = { text: [], strokes: 0 };
-    const ctx = new Proxy(
-      {
-        fillText: (t) => calls.text.push(String(t)),
-        measureText: (t) => ({ width: String(t).length * 10 }),
-        stroke: () => calls.strokes++,
-      },
-      { get: (target, key) => (key in target ? target[key] : () => {}), set: () => true },
-    );
-    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(ctx);
-    vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((cb) => cb(blob));
-    globalThis.Path2D = class {};
-    return calls;
-  }
-
   it('draws the title, label, date, every score and the average', async () => {
     const calls = fakeCanvas();
     const wheel = WHEELS[0];
@@ -116,12 +89,25 @@ describe('drawing the image', () => {
 });
 
 describe('the Download button', () => {
+  it('downloads the open wheel under the name typed, and says so', async () => {
+    fakeCanvas();
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Business' }));
+    fireEvent.change(screen.getByLabelText(/Name your image/), { target: { value: 'week 6' } });
+    const button = screen.getByRole('button', { name: /Download image/ });
+    fireEvent.click(button);
+    await waitFor(() => expect(click).toHaveBeenCalledTimes(1));
+    expect(click.mock.contexts[0].download).toBe('NeuroDapt - Wheel of Business - Week 6.png');
+    expect(screen.getByText('Downloading “NeuroDapt - Wheel of Business - Week 6.png”.')).toBeTruthy();
+    expect(button.disabled).toBe(false);
+  });
+
   it('says so, and becomes usable again, when this device cannot make the image', async () => {
-    setTouch(false);
     render(<App />);
     const button = screen.getByRole('button', { name: /Download image/ });
     fireEvent.click(button);
     await waitFor(() => expect(screen.getByText(/could not be made/)).toBeTruthy());
     expect(button.disabled).toBe(false);
+    expect(click).not.toHaveBeenCalled();
   });
 });

@@ -379,6 +379,21 @@ p {
   align-content: start;
 }
 
+.save-image {
+  display: grid;
+  gap: 12px;
+}
+
+/* Phones and tablets (a touch screen as the main input, whatever its size):
+   people take a screenshot instead, so the image name and Download are left
+   off to save room. Laptops and desktops keep them. Delete this rule to offer
+   the download everywhere. */
+@media (pointer: coarse) {
+  .save-image {
+    display: none;
+  }
+}
+
 .field {
   display: grid;
   gap: 6px;

@@ -1,5 +1,5 @@
 // Draws a clean, fixed-layout image of a wheel (1600 × 2000 PNG, portrait 4:5)
-// for downloading or sharing. It is drawn from the same geometry as the page,
+// for downloading. It is drawn from the same geometry as the page,
 // so it looks the same whatever device it was made on.
 
 import { LEVELS } from './config.js';
@@ -143,7 +143,7 @@ function drawSummary(ctx, wheel, levels, top) {
   });
 }
 
-export function formatDate(date) {
+function formatDate(date) {
   try {
     return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
   } catch {
@@ -215,28 +215,9 @@ export async function renderWheelImage({ wheel, levels, label, date = new Date()
   });
 }
 
-// Phones and tablets get the share sheet (so the image can go straight to
-// Photos or a message); everything else downloads it.
-export function prefersShare() {
-  return Boolean(window.matchMedia?.('(pointer: coarse)').matches && typeof navigator.canShare === 'function');
-}
-
-// Hands the image to the person. Phones get the share sheet; if sharing is
-// unavailable or refused (other than the person cancelling), it downloads.
-//
-// navigator.share must be called promptly after the tap, so nothing here
-// awaits before it: the image is drawn beforehand (see Actions).
-export async function deliverImage(blob, fileName) {
-  const file = typeof File === 'function' ? new File([blob], fileName, { type: 'image/png' }) : null;
-  if (prefersShare() && file && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file] });
-      return 'shared';
-    } catch (err) {
-      if (err?.name === 'AbortError') return 'cancelled';
-      // Otherwise fall through and download it instead.
-    }
-  }
+// Saves the image through the browser's ordinary download. (Phones and
+// tablets don't offer it: people there take a screenshot instead.)
+export function downloadImage(blob, fileName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -245,6 +226,6 @@ export async function deliverImage(blob, fileName) {
   document.body.appendChild(a);
   a.click();
   a.remove();
+  // Revoking the link straight away can cancel the download in some browsers.
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
-  return 'downloaded';
 }

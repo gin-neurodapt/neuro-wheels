@@ -2,13 +2,17 @@
 
 The Wheel of Life, Wheel of Relationships and Wheel of Business as one free,
 public page. A visitor scores each of 8 areas from 0 to 100% by tapping the
-wheel (or with the + and − buttons), sees their average, and can download the
-result as an image.
+wheel (or with the + and − buttons), sees their average, and on a computer can
+download the result as an image.
 
 - **Works on every screen.** The wheel and its labels are one scalable
   drawing, so nothing is positioned per device. Wide screens show the names
   around the wheel; phones show icons and percentages, with the names in the
   list underneath.
+- **No download on phones and tablets.** People take a screenshot there, so
+  the image name and Download button are left off to save room. It is one
+  CSS rule (`@media (pointer: coarse)` under "Save and reset" in
+  `src/styles.css`); delete it to offer the download everywhere.
 - **Private.** Scores are kept in the visitor's own browser (so a reload
   doesn't lose them). Nothing is sent anywhere: the page has no server, no
   analytics, and loads nothing from any other website.
@@ -54,9 +58,9 @@ Links can open a particular wheel directly: `/#life`, `/#relationships`,
 | `src/App.jsx` | Page layout, scores, remembering them, the `#wheel` link |
 | `src/components/WheelChart.jsx` | The interactive wheel (SVG) |
 | `src/components/ScoreList.jsx` | The list of areas with + and − buttons |
-| `src/components/Actions.jsx` | Image name, Download, Reset |
+| `src/components/Actions.jsx` | Image name and Download (computers only), Reset |
 | `src/wheels/geometry.js` | Wheel shapes and label positions (shared by the page and the image) |
-| `src/wheels/exportImage.js` | Draws the downloadable PNG; share sheet on phones |
+| `src/wheels/exportImage.js` | Draws the downloadable PNG and downloads it |
 | `src/wheels/storage.js` | Saving and safely re-reading scores |
 | `src/styles.css` | All styling; one-column on phones, two columns on wide screens and sideways phones |
 | `public/_headers` | Security headers (Cloudflare Pages) |
@@ -97,6 +101,3 @@ policy blocks any script it did not ship with, so for this subdomain keep
 automatic **Web Analytics** injection or **Zaraz**. Bot Fight Mode's
 JavaScript check is blocked too; that only shows as a console message, and
 the page works.
-
-If the page is embedded in a frame, phones can't open the share sheet unless
-the frame has `allow="web-share"`; without it, the image downloads instead.
