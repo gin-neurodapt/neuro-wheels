@@ -64,7 +64,10 @@ Links can open a particular wheel directly: `/#life`, `/#relationships`,
 | `src/wheels/storage.js` | Saving and safely re-reading scores |
 | `src/styles.css` | All styling; one-column on phones, two columns on wide screens and sideways phones |
 | `public/_headers` | Security headers (Cloudflare Pages) |
-| `public/favicon.svg` | Master icon; the PNG icons were rendered from it |
+| `src/assets/logo.svg` | The NeuroDapt logo: the page header, the downloaded image, and the source of every picture below |
+| `public/og-image.png` | The picture shown when the link is shared (WhatsApp, Messages, Facebook…), set in `index.html` |
+| `public/favicon.svg`, `favicon.ico` | Browser-tab icon: the logo's mountain, with heavier lines so it shows at 16px |
+| `public/apple-touch-icon.png`, `icon-*.png` | Home-screen and install icons: the full logo |
 
 ## Publishing (Cloudflare Pages)
 
