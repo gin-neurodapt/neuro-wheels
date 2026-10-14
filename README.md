@@ -2,13 +2,21 @@
 
 The Wheel of Life, Wheel of Relationships and Wheel of Business as one free,
 public page. A visitor scores each of 8 areas from 0 to 100% by tapping the
-wheel (or with the + and − buttons), sees their average, and on a computer can
-download the result as an image.
+wheel (or with the + and − buttons), can read what each area covers, and on a
+computer can download the result as an image.
 
-- **Works on every screen.** The wheel and its labels are one scalable
-  drawing, so nothing is positioned per device. Wide screens show the names
-  around the wheel; phones show icons and percentages, with the names in the
-  list underneath.
+- **No average, on purpose.** The aim is an even wheel, not a full one: the
+  page shows how uneven the areas are, never an overall score to push up.
+- **Works on every screen.** The header carries the logo, the wheel's name and
+  the wheel picker. On phones the wheel is sized so that it and every area's
+  score fit on the first screen together. The wheel and its labels are one
+  scalable drawing, so nothing is positioned per device: wide screens show
+  the names around the wheel, phones show icons and percentages (or icons
+  alone when the wheel is small), with the names in the list underneath.
+  Buttons are the same size on every device.
+- **Descriptions.** Tapping an area's name (or its icon on the wheel) opens a
+  short description under it. With a mouse, pointing at an area's icon, name
+  or percentage shows it in a small card instead.
 - **No download on phones and tablets.** People take a screenshot there, so
   the image name and Download button are left off to save room. It is one
   CSS rule (`@media (pointer: coarse)` under "Save and reset" in
@@ -37,6 +45,8 @@ Everything about the wheels lives in `src/wheels/config.js`:
 
 - **Rename an area:** edit its `name`. Long names wrap onto two lines
   automatically.
+- **Change what an area's description says:** edit its `about` (a sentence
+  or two; a test keeps it under 140 characters so it fits the card).
 - **Change an icon:** set `icon` to any name from
   [phosphoricons.com](https://phosphoricons.com), then run `npm run icons`.
   That copies the icon's drawing into `src/wheels/icons.generated.js`. A test
@@ -45,8 +55,10 @@ Everything about the wheels lives in `src/wheels/config.js`:
   `tab` label, colours and 8 slices. It appears in the picker and gets its
   own link (`/#<id>`). `ink` is the text colour; a test checks it is
   readable on white.
-- **Colours:** `fill` paints scored rings, `stroke` draws the lines, `ink`
-  is used for text and buttons.
+- **Colours:** `fill` paints scored rings, `stroke` draws the outer rim (the
+  lines inside it are a much lighter version of it, set by
+  `INNER_LINE_FADE` in `src/wheels/colour.js`), `ink` is used for text,
+  buttons and the score outlines.
 
 Links can open a particular wheel directly: `/#life`, `/#relationships`,
 `/#business`.
@@ -57,12 +69,14 @@ Links can open a particular wheel directly: `/#life`, `/#relationships`,
 | --- | --- |
 | `src/App.jsx` | Page layout, scores, remembering them, the `#wheel` link |
 | `src/components/WheelChart.jsx` | The interactive wheel (SVG) |
-| `src/components/ScoreList.jsx` | The list of areas with + and − buttons |
-| `src/components/Actions.jsx` | Image name and Download (computers only), Reset |
-| `src/wheels/geometry.js` | Wheel shapes and label positions (shared by the page and the image) |
+| `src/components/ScoreList.jsx` | The list of areas with + and − buttons; tapping a name opens its description |
+| `src/components/AreaCard.jsx` | The description card shown while a mouse points at an area |
+| `src/components/Actions.jsx` | Image name and Download (computers only), Reset this wheel / Reset all wheels |
+| `src/wheels/geometry.js` | Wheel shapes, label positions, and which label style fits (shared by the page and the image) |
+| `src/wheels/colour.js` | The light inner lines and dark rim |
 | `src/wheels/exportImage.js` | Draws the downloadable PNG and downloads it |
 | `src/wheels/storage.js` | Saving and safely re-reading scores |
-| `src/styles.css` | All styling; one-column on phones, two columns on wide screens and sideways phones |
+| `src/styles.css` | All styling; one-column on phones, two columns on wide screens and sideways phones. `--header-total` must match the header's real height (the phone wheel is sized from it) |
 | `public/_headers` | Security headers (Cloudflare Pages) |
 | `src/assets/logo.svg` | The NeuroDapt logo: the page header, the downloaded image, and the source of every picture below |
 | `public/og-image.png` | The picture shown when the link is shared (WhatsApp, Messages, Facebook…), set in `index.html` |
