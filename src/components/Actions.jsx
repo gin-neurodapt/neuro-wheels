@@ -2,8 +2,9 @@ import { useEffect, useId, useState } from 'react';
 import { Icon } from './Icon.jsx';
 import { LABEL_MAX, cleanLabel, imageFileName } from '../wheels/filename.js';
 import { renderWheelImage, downloadImage, ensureFonts, loadImage } from '../wheels/exportImage.js';
+import { ShareResults } from './ShareResults.jsx';
 
-export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAll, anyScores, logoUrl }) {
+export function Actions({ wheel, levels, scores, label, onLabel, onResetWheel, onResetAll, anyScores, logoUrl }) {
   const inputId = useId();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
@@ -42,11 +43,12 @@ export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAl
     setStatus('');
   }
 
-  // The image controls are hidden on phones and tablets (see styles.css).
+  // The image name and Download are hidden on phones and tablets (see
+  // styles.css); Share results shows wherever it can work.
   return (
     <div className="actions">
-      <section className="save-image" aria-label="Save as an image">
-        <div className="field">
+      <section className="save-image" aria-label="Save or share your wheel">
+        <div className="field save-name">
           <label htmlFor={inputId}>
             Name your image <span className="optional">(optional)</span>
           </label>
@@ -62,14 +64,17 @@ export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAl
             onChange={(e) => onLabel(cleanLabel(e.target.value))}
           />
         </div>
-        <button type="button" className="btn btn-primary" onClick={download} disabled={busy}>
-          <Icon name="download-simple" size={20} />
-          <span className="btn-text">{busy ? 'Preparing image…' : 'Download image'}</span>
-        </button>
-        <p className="status" role="status" aria-live="polite">
-          {status}
-        </p>
+        <div className="image-buttons">
+          <button type="button" className="btn btn-primary btn-download" onClick={download} disabled={busy}>
+            <Icon name="download-simple" size={20} />
+            <span className="btn-text">{busy ? 'Preparing image…' : 'Download image'}</span>
+          </button>
+          <ShareResults wheel={wheel} scores={scores} label={label} logoUrl={logoUrl} onStatus={setStatus} />
+        </div>
       </section>
+      <p className="status" role="status" aria-live="polite">
+        {status}
+      </p>
       <div className="actions-row">
         <button type="button" className="btn btn-reset-wheel" onClick={resetWheel}>
           <Icon name="arrow-counter-clockwise" size={18} />

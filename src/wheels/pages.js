@@ -77,7 +77,7 @@ const SHARED_FAQ = [
   },
   {
     q: 'Is the {wheel} free? Do I need to sign up?',
-    a: 'It is free, with no sign-up or account. Your scores are saved only in your own browser on this device, and nothing is sent anywhere.',
+    a: 'It is free, with no sign-up or account. Your scores are saved only in your own browser on this device, and nothing is sent anywhere unless you choose to share it.',
   },
   {
     q: 'How often should I fill it in?',
@@ -87,12 +87,16 @@ const SHARED_FAQ = [
     q: 'Can I use the {wheel} as an app on my phone?',
     a: 'Yes, for free. Open this page on your phone and tap Get the app near the bottom: on Android it usually installs in one tap, and on iPhone or iPad you add it from the Share menu. It then opens from your home screen like any other app and works without the internet, and your scores stay on your phone.',
   },
+  {
+    q: 'Can I share my {wheel} results?',
+    a: 'Yes. Tap Share results under the wheel to send a picture of it by email, WhatsApp, Messenger or any other app on your phone or computer. If you have scored the other wheels too, it asks whether to send those as well. Nothing is shared unless you choose to.',
+  },
 ];
 
 const STEPS = [
   'Score each area from 0 to 100%: tap or click a ring on the wheel, or use the + and − buttons. Tap or click an area’s name to read what it covers.',
   'Look at the shape. The aim is an even wheel, not a full one: deep dips are where things feel most out of balance.',
-  'Choose one or two areas to work on first. Come back in a few weeks to see how the shape has changed (on a computer you can save your wheel as an image).',
+  'Choose one or two areas to work on first. Come back in a few weeks to see how the shape has changed (Share results sends a picture of your wheel to yourself or anyone you choose, so you can compare).',
 ];
 
 const COUNT_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];

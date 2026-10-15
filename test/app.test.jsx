@@ -281,7 +281,7 @@ describe('the wheel page', () => {
     render(<App />);
     const picker = screen.getByRole('group', { name: 'Choose a wheel' });
     const buttons = [...picker.querySelectorAll('button'), ...document.querySelectorAll('.btn')];
-    expect(buttons.length).toBe(6);
+    expect(buttons.length).toBe(7);
     for (const b of buttons) expect(b.querySelector('.btn-text')?.textContent).toBe(b.textContent);
   });
 

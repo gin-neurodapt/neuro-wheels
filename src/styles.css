@@ -797,12 +797,128 @@ p {
 }
 
 /* Phones and tablets (a touch screen as the main input, whatever its size):
-   people take a screenshot instead, so the image name and Download are left
-   off to save room. Laptops and desktops keep them. Delete this rule to offer
-   the download everywhere. */
+   people take a screenshot or use Share results instead, so the image name and
+   Download are left off to save room. Laptops and desktops keep them. Delete
+   this rule to offer the download everywhere. */
 @media (pointer: coarse) {
-  .save-image {
+  .save-image .save-name,
+  .image-buttons .btn-download {
     display: none;
+  }
+
+  /* No empty gap under Share results while there is nothing to say. Taken
+     out of the layout rather than hidden, so screen readers still hear what
+     it says when it does speak. */
+  .actions > .status:empty {
+    position: absolute;
+  }
+}
+
+/* Download and Share results side by side; either fills the row alone. */
+.image-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.image-buttons > .btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* A computer whose browser cannot share has Download instead. (Phones keep
+   the button: it says what to do instead.) */
+@media not all and (pointer: coarse) {
+  .image-buttons .share-none {
+    display: none;
+  }
+}
+
+/* "Share your other wheels too?" */
+.share-dialog {
+  width: min(400px, calc(100vw - 2 * var(--gutter)));
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 12px 40px rgba(20, 32, 36, 0.28);
+}
+
+.share-dialog::backdrop {
+  background: rgba(20, 32, 36, 0.45);
+}
+
+.share-dialog-body {
+  display: grid;
+  gap: 12px;
+  padding: 22px 20px 18px;
+  line-height: 1.5;
+}
+
+.share-dialog h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: #3b4245;
+}
+
+.share-choices {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block: 1px solid var(--line);
+}
+
+.share-choices li + li {
+  border-top: 1px solid var(--line);
+}
+
+.share-choices label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.share-choices input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.share-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.share-note:empty {
+  display: none;
+}
+
+.share-dialog-buttons {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-cancel {
+  border: 1px solid var(--field);
+  background: #fff;
+  color: var(--text);
+}
+
+@media (hover: hover) {
+  .btn-cancel:hover {
+    background: var(--surface);
   }
 }
 

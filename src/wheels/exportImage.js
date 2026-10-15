@@ -1,5 +1,5 @@
 // Draws a clean, fixed-layout image of a wheel (1600 × 2000 PNG, portrait 4:5)
-// for downloading. It is drawn from the same geometry as the page,
+// for downloading and sharing. It is drawn from the same geometry as the page,
 // so it looks the same whatever device it was made on.
 
 import { LEVELS } from './config.js';
@@ -207,7 +207,7 @@ export async function renderWheelImage({ wheel, levels, label, date = new Date()
 }
 
 // Saves the image through the browser's ordinary download. (Phones and
-// tablets don't offer it: people there take a screenshot instead.)
+// tablets don't offer it: people there use Share results or a screenshot.)
 export function downloadImage(blob, fileName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

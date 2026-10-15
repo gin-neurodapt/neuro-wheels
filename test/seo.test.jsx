@@ -50,6 +50,16 @@ describe('each wheel’s own page', () => {
     }
   });
 
+  it('answers whether the results can be shared', () => {
+    for (const p of ALL_PAGES) {
+      const share = p.faq.find((f) => f.q === `Can I share my ${p.wheel.title} results?`);
+      expect(share, p.id).toBeTruthy();
+      for (const words of ['Share results', 'email', 'WhatsApp', 'Messenger', 'other wheels', 'unless you choose']) {
+        expect(share.a, words).toContain(words);
+      }
+    }
+  });
+
   it('has a title and description search engines will show whole', () => {
     for (const p of ALL_PAGES) {
       expect(p.title.startsWith(p.wheel.title), p.title).toBe(true);

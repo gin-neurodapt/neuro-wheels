@@ -168,6 +168,7 @@ export const UI_ICONS = [
   'minus',
   'plus',
   'download-simple',
+  'share-network',
   'arrow-counter-clockwise',
   'arrows-counter-clockwise',
   'caret-down',

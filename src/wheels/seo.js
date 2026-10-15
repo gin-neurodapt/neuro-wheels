@@ -154,7 +154,7 @@ export function llmsTxt() {
   const lines = [
     `# ${SITE_NAME}`,
     '',
-    `> Free, private, interactive Wheel of Life, Wheel of Relationships and Wheel of Business tools from ${BRAND.name} (${BRAND.author}, ${BRAND.role}, ${BRAND.place}). Score eight areas from 0 to 100% and see where things are out of balance. No sign-up; scores stay on the visitor's own device and nothing is sent anywhere.`,
+    `> Free, private, interactive Wheel of Life, Wheel of Relationships and Wheel of Business tools from ${BRAND.name} (${BRAND.author}, ${BRAND.role}, ${BRAND.place}). Score eight areas from 0 to 100% and see where things are out of balance. No sign-up; scores stay on the visitor's own device and nothing is sent anywhere unless they choose to share a picture of their wheel.`,
     '',
     'The aim is an even wheel, not a full one: the tools deliberately show no overall score or average.',
     '',

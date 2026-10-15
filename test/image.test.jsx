@@ -3,33 +3,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from '../src/App.jsx';
 import { WHEELS } from '../src/wheels/config.js';
 import { downloadImage, renderWheelImage } from '../src/wheels/exportImage.js';
+import { fakeCanvas as drawOn, InstantImage } from './fake-canvas.js';
 
 const blob = new Blob(['png'], { type: 'image/png' });
-
-function fakeCanvas() {
-  const calls = { text: [], strokes: 0 };
-  const ctx = new Proxy(
-    {
-      fillText: (t) => calls.text.push(String(t)),
-      measureText: (t) => ({ width: String(t).length * 10 }),
-      stroke: () => calls.strokes++,
-    },
-    { get: (target, key) => (key in target ? target[key] : () => {}), set: () => true },
-  );
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(ctx);
-  vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((cb) => cb(blob));
-  globalThis.Path2D = class {};
-  return calls;
-}
-
-// jsdom never loads images; the logo "loads" at once.
-class InstantImage {
-  naturalWidth = 115;
-  naturalHeight = 79;
-  set src(_) {
-    queueMicrotask(() => this.onload());
-  }
-}
+const fakeCanvas = () => drawOn(blob);
 
 let click;
 beforeEach(() => {

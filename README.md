@@ -3,8 +3,9 @@
 The Wheel of Life, Wheel of Relationships and Wheel of Business as free,
 public pages, one per wheel: `/` (Wheel of Life), `/wheel-of-relationships`
 and `/wheel-of-business`. A visitor scores each of 8 areas from 0 to 100% by tapping the
-wheel (or with the + and − buttons), can read what each area covers, and on a
-computer can download the result as an image.
+wheel (or with the + and − buttons), can read what each area covers, can
+share a picture of the result (email, WhatsApp, Messenger…), and on a computer
+can download it as an image.
 
 - **No average, on purpose.** The aim is an even wheel, not a full one: the
   page shows how uneven the areas are, never an overall score to push up.
@@ -21,13 +22,24 @@ computer can download the result as an image.
 - **Descriptions.** Tapping an area's name (or its icon on the wheel) opens a
   short description under it. With a mouse, pointing at an area's icon, name
   or percentage shows it in a small card instead.
-- **No download on phones and tablets.** People take a screenshot there, so
-  the image name and Download button are left off to save room. It is one
-  CSS rule (`@media (pointer: coarse)` under "Save and reset" in
-  `src/styles.css`); delete it to offer the download everywhere.
+- **No download on phones and tablets.** People take a screenshot or use
+  Share results there, so the image name and Download button are left off to
+  save room. It is one CSS rule (`@media (pointer: coarse)` under "Save and
+  reset" in `src/styles.css`); delete it to offer the download everywhere.
+- **Share results.** Sends a picture of the open wheel (the same picture
+  Download makes) through the device's own share sheet, so the person picks
+  the app (email, WhatsApp, Messenger…) and who it goes to. If other wheels
+  have scores too, it first asks "Share your other wheels too?" with each of
+  them to tick (none ticked to start with); an empty wheel asks for scores
+  first. The pictures are drawn a moment after the scores settle, so the
+  share sheet opens within the tap: Safari refuses a share that comes after
+  waiting for anything. A browser that cannot share pictures shares the
+  scores as words instead; one that cannot share at all says what to do on a
+  phone, and on a computer the button is hidden (Download is there).
 - **Private.** Scores are kept in the visitor's own browser (so a reload
-  doesn't lose them). Nothing is sent anywhere: the page has no server, no
-  analytics, and loads nothing from any other website.
+  doesn't lose them). The page itself sends nothing anywhere: it has no
+  server, no analytics, and loads nothing from any other website. Sharing is
+  done by the device, only when the person chooses to.
 - **Standalone.** A static site with no login and no connection to the
   clinic app.
 - **Found by search engines and AI assistants.** Each wheel's page is built
@@ -111,10 +123,12 @@ that device.
 | `src/components/WheelChart.jsx` | The interactive wheel (SVG) |
 | `src/components/ScoreList.jsx` | The list of areas with + and − buttons; tapping a name opens its description |
 | `src/components/AreaCard.jsx` | The description card shown while a mouse points at an area |
-| `src/components/Actions.jsx` | Image name and Download (computers only), Reset this wheel / Reset all wheels |
+| `src/components/Actions.jsx` | Image name and Download (computers only), Share results, Reset this wheel / Reset all wheels |
+| `src/components/ShareResults.jsx` | The Share results button and its "Share your other wheels too?" question; draws the pictures ahead of time |
+| `src/wheels/share.js` | What this browser can share, which other wheels have scores, and the words sent with the pictures |
 | `src/wheels/geometry.js` | Wheel shapes, label positions, and which label style fits (shared by the page and the image) |
 | `src/wheels/colour.js` | The light inner lines and dark rim; each wheel's colours as CSS (`vite.config.js` serves it) |
-| `src/wheels/exportImage.js` | Draws the downloadable PNG and downloads it |
+| `src/wheels/exportImage.js` | Draws the PNG (for Download and Share results) and downloads it |
 | `src/wheels/storage.js` | Saving and safely re-reading scores |
 | `src/styles.css` | All styling; one-column on phones, two columns on wide screens and sideways phones. `--header-total` must match the header's real height (the phone wheel is sized from it) |
 | `public/_headers` | Security headers (Cloudflare Pages) |

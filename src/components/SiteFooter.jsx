@@ -8,7 +8,7 @@ export function SiteFooter({ logoUrl }) {
         <img src={logoUrl} alt="" width="115" height="79" />
         <span>Visit neurodapt.au</span>
       </a>
-      <p>Your scores stay on this device. Nothing is sent anywhere.</p>
+      <p>Your scores stay on this device unless you share them.</p>
       <p>
         Developed by {BRAND.author}, {BRAND.role}, Sydney.
         <br />© {new Date().getFullYear()} {BRAND.name}. All rights reserved.

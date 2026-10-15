@@ -136,6 +136,7 @@ export default function App({ start }) {
         <Actions
           wheel={wheel}
           levels={levels}
+          scores={state.scores}
           label={state.label}
           onLabel={onLabel}
           onResetWheel={onResetWheel}
