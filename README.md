@@ -174,3 +174,13 @@ policy blocks any script it did not ship with, so for this subdomain keep
 automatic **Web Analytics** injection or **Zaraz**. Bot Fight Mode's
 JavaScript check is blocked too; that only shows as a console message, and
 the page works.
+
+Scripts are allowed only from the `/assets/` folder (every script the app
+ships is there), not from anywhere on the site. Cloudflare's **Google tag
+gateway** for the `neurodapt.au` zone adds Google's tag to every page as a
+script served from this site's own address (`/metrics/`), which a plain
+`'self'` would let run; it is set for the whole zone and cannot be turned off
+for one subdomain. The folder rule blocks it, along with the two small inline
+scripts it adds. **If the site moves to a new address, add that address to
+`script-src` in `public/_headers`**, or the page stays blank there (a test
+checks the current address is listed).

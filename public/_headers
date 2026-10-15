@@ -2,11 +2,17 @@
 # The page is fully static and loads nothing from any other site, so the
 # Content-Security-Policy allows this site only.
 #
+# script-src names the folder, not just the site: every script the app ships
+# is in /assets/. The Cloudflare zone can add scripts served from this
+# site's own address (its Google tag gateway puts Google's tag at /metrics/,
+# measured 2026-10-15), which 'self' would let run. If the site moves to a
+# new address, add that address here too, or the page stays blank.
+#
 # frame-ancestors allows NeuroDapt's own sites to embed the page (e.g. on
 # neurodapt.au) and no one else. Change it to 'none' to forbid embedding.
 
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self' https://neurodapt.au https://*.neurodapt.au; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src https://wheels.neurodapt.au/assets/ https://neuro-wheels.pages.dev/assets/ https://*.neuro-wheels.pages.dev/assets/; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self' https://neurodapt.au https://*.neurodapt.au; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), browsing-topics=()

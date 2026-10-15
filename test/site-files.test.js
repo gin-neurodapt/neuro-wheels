@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WHEELS } from '../src/wheels/config.js';
-import { wheelFromPath } from '../src/wheels/pages.js';
+import { SITE_URL, wheelFromPath } from '../src/wheels/pages.js';
 import { wheelFromHash } from '../src/wheels/storage.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -84,6 +84,15 @@ describe('the app on a phone’s home screen', () => {
     // The page-wide policy is taken off first, or both would apply.
     expect(sw[0]).toBe('! Content-Security-Policy');
     expect(csp(sw)).toBe("Content-Security-Policy: default-src 'none'; connect-src 'self'");
+  });
+
+  it('runs only the scripts the app ships, from /assets/, never others served from this address', () => {
+    // The Cloudflare zone serves Google's tag from this site's own address
+    // (/metrics/), so 'self' would let it run.
+    const scriptSrc = csp(rule('/*')).match(/script-src ([^;]+);/)[1].split(/\s+/);
+    expect(scriptSrc).toContain(`${SITE_URL}/assets/`);
+    expect(scriptSrc).not.toContain("'self'");
+    for (const source of scriptSrc) expect(source, source).toMatch(/^https:\/\/[^/'\s]+\/assets\/$/);
   });
 
   it('still lets the pages connect nowhere, and run only this site’s helper', () => {
