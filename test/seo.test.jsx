@@ -40,6 +40,16 @@ describe('each wheel’s own page', () => {
     for (const p of ALL_PAGES) expect(p.url).toBe(SITE_URL + p.path);
   });
 
+  it('answers whether it can be used as an app on a phone', () => {
+    for (const p of ALL_PAGES) {
+      const app = p.faq.find((f) => f.q === `Can I use the ${p.wheel.title} as an app on my phone?`);
+      expect(app, p.id).toBeTruthy();
+      for (const words of ['Get the app', 'home screen', 'without the internet', 'iPhone', 'Android']) {
+        expect(app.a, words).toContain(words);
+      }
+    }
+  });
+
   it('has a title and description search engines will show whole', () => {
     for (const p of ALL_PAGES) {
       expect(p.title.startsWith(p.wheel.title), p.title).toBe(true);

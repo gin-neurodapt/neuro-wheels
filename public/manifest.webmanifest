@@ -1,15 +1,62 @@
 {
+  "id": "/",
   "name": "NeuroDapt Wheels",
   "short_name": "Wheels",
   "description": "Free, private Wheel of Life, Wheel of Relationships and Wheel of Business: score eight areas and see where things are out of balance.",
+  "lang": "en-AU",
+  "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#177082",
+  "categories": ["health", "lifestyle", "productivity"],
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Wheel of Life",
+      "short_name": "Life",
+      "url": "/#life",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Wheel of Relationships",
+      "short_name": "Relationships",
+      "url": "/wheel-of-relationships",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Wheel of Business",
+      "short_name": "Business",
+      "url": "/wheel-of-business",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/life.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "The Wheel of Life: score eight areas of your life"
+    },
+    {
+      "src": "/screenshots/relationships.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "The Wheel of Relationships: eight areas of a relationship"
+    },
+    {
+      "src": "/screenshots/business.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "The Wheel of Business: eight areas of a business"
+    }
   ]
 }

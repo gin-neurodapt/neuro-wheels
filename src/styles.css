@@ -85,7 +85,7 @@ p {
   width: 100%;
   max-width: 1320px;
   margin: 0 auto;
-  padding: 10px var(--gutter) 36px;
+  padding: 10px var(--gutter) 24px;
   padding-left: max(var(--gutter), env(safe-area-inset-left));
   padding-right: max(var(--gutter), env(safe-area-inset-right));
   display: grid;
@@ -146,39 +146,107 @@ p {
   }
 }
 
-/* ── About this wheel (under the tool) ───────────────────────────────────── */
+/* ── More about this wheel: a row of small icons under the tool ─────────── */
 
+/* Quiet on purpose: grey icons with small words, each opening one panel
+   (about, how to use, areas, questions, the app) under the row. */
 .about-wheel {
-  border-top: 1px solid var(--line);
-  padding: 36px var(--gutter) 44px;
+  padding: 0 var(--gutter) 28px;
   padding-left: max(var(--gutter), env(safe-area-inset-left));
   padding-right: max(var(--gutter), env(safe-area-inset-right));
 }
 
-.about-inner {
+.about-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 6px;
   max-width: 760px;
   margin: 0 auto;
-  line-height: 1.6;
+  scroll-margin-top: 12px;
 }
 
-.about-inner h2 {
-  margin: 36px 0 10px;
+.about-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 60px;
+  min-height: 52px;
+  padding: 7px 8px 6px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: #7c868b;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Phones: the icons spread across the width, and all five fit on one row
+   down to the narrowest (320px) screens. */
+@media (max-width: 599px) {
+  .about-tabs {
+    gap: 2px 0;
+    justify-content: space-evenly;
+  }
+
+  .about-tab {
+    min-width: 44px;
+    padding-inline: 6px;
+  }
+}
+
+.about-tab[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--accent-fill) 22%, #fff);
+  color: var(--accent);
+}
+
+@media (hover: hover) {
+  .about-tab:not([aria-expanded='true']):hover {
+    color: var(--text);
+  }
+}
+
+/* "Get the app" is for phones and tablets (the same test as the download,
+   the other way round). */
+.about-tab-app {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .about-tab-app {
+    display: inline-flex;
+  }
+}
+
+.about-panel {
+  max-width: 760px;
+  margin: 14px auto 0;
+  line-height: 1.6;
+  animation: fade-in 0.25s ease-out both;
+}
+
+.about-panel[hidden] {
+  display: none;
+}
+
+.about-panel h2 {
+  margin: 0 0 10px;
   font-family: var(--serif);
   font-weight: 400;
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   line-height: 1.2;
   color: #3b4245;
 }
 
-.about-inner > h2:first-child {
-  margin-top: 0;
-}
-
-.about-inner p + p {
+.about-panel p + p {
   margin-top: 10px;
 }
 
-.about-steps {
+.about-steps,
+.app-steps {
   display: grid;
   gap: 8px;
   margin: 0;
@@ -188,7 +256,7 @@ p {
 .about-areas {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: 16px 28px;
+  gap: 14px 28px;
   margin: 0;
 }
 
@@ -204,19 +272,64 @@ p {
   margin: 2px 0 0;
 }
 
+/* Common questions: tap a question to open its answer. */
+.about-faq details {
+  border-bottom: 1px solid var(--line);
+}
+
+.about-faq details:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.about-faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 0;
+  list-style: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.about-faq summary::-webkit-details-marker {
+  display: none;
+}
+
 .about-faq h3 {
-  margin: 18px 0 4px;
-  font-size: 1.05rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1.35;
 }
 
-.about-faq > div:first-child h3 {
-  margin-top: 0;
+.faq-caret {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+
+.about-faq details[open] .faq-caret {
+  transform: rotate(180deg);
+}
+
+.about-faq details p {
+  padding: 0 0 14px;
+}
+
+.about-more {
+  margin-top: 18px;
+}
+
+.about-more h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
 }
 
 .about-more ul {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -231,6 +344,32 @@ p {
 
 .about-more span {
   display: block;
+}
+
+/* Get the app. */
+.about-panel-app .btn-install {
+  margin-top: 14px;
+  min-width: 200px;
+}
+
+.app-steps {
+  margin-top: 12px;
+}
+
+.app-steps li {
+  padding-left: 2px;
+}
+
+.app-step-icon {
+  margin-left: 4px;
+  vertical-align: -4px;
+  color: var(--accent);
+}
+
+.app-steps small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 /* The page for an address that does not exist (404.html). */

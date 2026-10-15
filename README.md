@@ -34,10 +34,21 @@ computer can download the result as an image.
   ahead of time with its whole content in the HTML (most AI crawlers do not
   run JavaScript), its own title, description, canonical address,
   link-preview tags and schema.org data (WebApplication, FAQPage, the
-  organisation and its author). Under the wheel, each page says what the
-  wheel is, how to use it, its areas and common questions. The site also
-  has `sitemap.xml`, `robots.txt` (pointing to it), `llms.txt` (a plain
+  organisation and its author). Each page also says what the wheel is, how
+  to use it, its areas and common questions, but out of the way: a quiet
+  row of small icons under the wheel (About, How to use, Areas, FAQ), each
+  opening its panel. Closed panels are hidden from view, not left out of the
+  page, so search engines and AI assistants still read every word. The site
+  also has `sitemap.xml`, `robots.txt` (pointing to it), `llms.txt` (a plain
   summary for AI assistants) and a real 404 page.
+- **An app on the phone.** "Get the app" (the last icon in the row, on
+  phones and tablets only) adds the site to the home screen: one button on
+  Android, the Share → Add to Home Screen steps on iPhone and iPad. It then
+  opens full screen like any app, works without the internet (`sw.js`
+  keeps the site's own files on the device), and offers each wheel from a
+  long press on its icon. Android's install sheet shows a picture of each
+  wheel (`public/screenshots/`). Nothing is sent anywhere, and the scores
+  stay on the phone as before. There is no app-store version.
 
 ## Working on it
 
@@ -48,7 +59,8 @@ npm install
 npm run dev       # http://localhost:5173, reloads as you edit
 npm test          # the tests
 npm run build     # the site, ready to publish, in dist/ (builds the app, then
-                  # each wheel's page with scripts/prerender.mjs)
+                  # each wheel's page with scripts/prerender.mjs, then the
+                  # offline helper sw.js with scripts/build-sw.mjs)
 npm run preview   # serve dist/ locally to check the build
 ```
 
@@ -91,7 +103,10 @@ that device.
 | `src/wheels/pages.js` | Each wheel's page: address, search title and description, "about" text and questions |
 | `src/wheels/seo.js` | Builds each page's head tags, schema.org data, `sitemap.xml` and `llms.txt` (build time only) |
 | `src/entry-server.jsx`, `scripts/prerender.mjs` | Build each wheel's page ahead of time, plus `404.html` |
-| `src/components/AboutWheel.jsx` | Under the wheel: what it is, how to use it, its areas, questions, the other wheels |
+| `src/components/AboutWheel.jsx` | Under the wheel: the row of small icons and their panels (what it is and the other wheels, how to use it, its areas, questions, the app) |
+| `src/components/GetApp.jsx` | The "Get the app" panel: the install button, or the iPhone or browser-menu steps |
+| `src/pwa.js` | The app side: starts the offline helper, catches the browser's install offer, knows an iPhone and an installed app |
+| `src/sw/worker.js`, `scripts/build-sw.mjs` | The offline helper; the build writes it to `dist/sw.js` with the list of files it keeps |
 | `src/components/SiteFooter.jsx` | The footer, with the large logo linking to neurodapt.au |
 | `src/components/WheelChart.jsx` | The interactive wheel (SVG) |
 | `src/components/ScoreList.jsx` | The list of areas with + and − buttons; tapping a name opens its description |
@@ -109,6 +124,8 @@ that device.
 | `public/og-image.png` | The picture shown when the link is shared (WhatsApp, Messages, Facebook…), set for every page in `src/wheels/seo.js` |
 | `public/favicon.svg`, `favicon.ico` | Browser-tab icon: the logo's mountain, with heavier lines so it shows at 16px |
 | `public/apple-touch-icon.png`, `icon-*.png` | Home-screen and install icons: the full logo |
+| `public/manifest.webmanifest` | The app's name ("Wheels" under the icon), colours, icons, a shortcut to each wheel, and the install-sheet pictures |
+| `public/screenshots/*.png` | The install-sheet pictures: each wheel on a phone with sample scores, 780×1688 (a 390×844 screen at 2×). Take them again after a big change to the look; the manifest states their size, and a test checks it |
 
 ## Publishing (Cloudflare Pages)
 
@@ -138,6 +155,10 @@ requests), `nosniff`, a referrer policy, a permissions policy that turns off
 camera/microphone/location, and long-term caching for the hashed files in
 `/assets/`. Embedding in a frame is allowed only from `neurodapt.au` and its
 subdomains. Change `frame-ancestors` to `'none'` to forbid embedding.
+The offline helper, `sw.js`, gets a policy of its own (a helper obeys the
+policy sent with its own file): it may fetch this site's files and nothing
+else. Without that rule the page's `connect-src 'none'` would stop it
+keeping anything, and the app would not open offline.
 Each page's schema.org data is an inline JSON block: browsers never run it,
 so the policy does not block it. The built pages carry no inline `style=""`
 (`seo.js` strips the few the app sets; the browser sets them again).

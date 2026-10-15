@@ -189,20 +189,53 @@ describe('the wheel page', () => {
     expect(screen.getByRole('region', { name: 'Summary' }).querySelector('.score-list')).not.toBe(null);
   });
 
-  it('says what the wheel is, how to use it, its areas and common questions', () => {
+  it('tucks what the wheel is, how to use it, its areas and questions behind a row of small icons', () => {
     window.history.replaceState(null, '', '/wheel-of-business');
     render(<App />);
-    const about = screen.getByRole('region', { name: 'What is the Wheel of Business?' });
-    for (const name of ['How to use it', 'The 8 areas of the Wheel of Business', 'Common questions']) {
-      expect(within(about).getByRole('heading', { level: 2, name })).toBeTruthy();
+    const about = screen.getByRole('region', { name: 'More about the Wheel of Business' });
+    const tab = (name) => within(about).getByRole('button', { name });
+    const panelOf = (button) => document.getElementById(button.getAttribute('aria-controls'));
+    const names = ['About', 'How to use', 'Areas', 'FAQ', 'Get the app'];
+    for (const name of names) {
+      expect(tab(name).getAttribute('aria-expanded')).toBe('false');
+      expect(panelOf(tab(name)).hidden, name).toBe(true);
     }
-    const areas = about.querySelector('dl');
-    for (const area of ['Profit Margin', 'Innovation']) expect(within(areas).getByText(area)).toBeTruthy();
-    expect(within(about).getByRole('heading', { level: 3, name: 'Should I aim for 100% in every area?' })).toBeTruthy();
+    // Closed, but still in the page for search engines and AI assistants.
+    expect(about.textContent).toContain('Should I aim for 100% in every area?');
+    expect(about.textContent).toContain('What the business keeps after its costs');
+
+    fireEvent.click(tab('FAQ'));
+    expect(tab('FAQ').getAttribute('aria-expanded')).toBe('true');
+    const faq = panelOf(tab('FAQ'));
+    expect(faq.hidden).toBe(false);
+    expect(within(faq).getByRole('heading', { level: 2, name: 'Common questions' })).toBeTruthy();
+    const question = within(faq).getByRole('heading', { level: 3, name: 'Should I aim for 100% in every area?' });
+    // Each answer opens under its question.
+    expect(question.closest('summary')).not.toBe(null);
+    expect(question.closest('details').querySelector('p').textContent).toMatch(/^No\. The aim is an even wheel/);
+
+    // One panel at a time; tapping the open one closes it.
+    fireEvent.click(tab('Areas'));
+    expect(faq.hidden).toBe(true);
+    const areas = panelOf(tab('Areas'));
+    expect(areas.hidden).toBe(false);
+    expect(within(areas).getByRole('heading', { level: 2, name: 'The 8 areas of the Wheel of Business' })).toBeTruthy();
+    for (const area of ['Profit Margin', 'Innovation']) expect(within(areas.querySelector('dl')).getByText(area)).toBeTruthy();
+    fireEvent.click(tab('Areas'));
+    expect(areas.hidden).toBe(true);
+    expect(tab('Areas').getAttribute('aria-expanded')).toBe('false');
+
+    fireEvent.click(tab('How to use'));
+    expect(within(panelOf(tab('How to use'))).getByRole('heading', { level: 2, name: 'How to use it' })).toBeTruthy();
+    fireEvent.click(tab('About'));
+    expect(
+      within(panelOf(tab('About'))).getByRole('heading', { level: 2, name: 'What is the Wheel of Business?' }),
+    ).toBeTruthy();
   });
 
   it('links to the other wheels’ pages, and a click switches to one here', () => {
     render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'About' }));
     const more = screen.getByRole('navigation', { name: 'The other wheels' });
     const link = within(more).getByRole('link', { name: 'Wheel of Business' });
     expect(link.getAttribute('href')).toBe('/wheel-of-business');
@@ -212,6 +245,20 @@ describe('the wheel page', () => {
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
     expect(window.location.pathname).toBe('/wheel-of-business');
     expect(window.scrollTo).toHaveBeenCalled();
+  });
+
+  it('moves the row of icons up when a panel would open out of sight', () => {
+    render(<App />);
+    const row = document.querySelector('.about-tabs');
+    row.scrollIntoView = vi.fn();
+    vi.spyOn(row, 'getBoundingClientRect').mockReturnValue({ bottom: window.innerHeight - 20 });
+    fireEvent.click(screen.getByRole('button', { name: 'FAQ' }));
+    expect(row.scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({ block: 'start' }));
+
+    row.scrollIntoView.mockClear();
+    row.getBoundingClientRect.mockReturnValue({ bottom: 100 });
+    fireEvent.click(screen.getByRole('button', { name: 'Areas' }));
+    expect(row.scrollIntoView).not.toHaveBeenCalled();
   });
 
   it('shows the NeuroDapt logo in the footer, linking to the website', () => {

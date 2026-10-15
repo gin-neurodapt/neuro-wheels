@@ -164,7 +164,23 @@ export const WHEELS = [
 ];
 
 // Icons the page itself uses (buttons), drawn from the same icon set.
-export const UI_ICONS = ['minus', 'plus', 'download-simple', 'arrow-counter-clockwise', 'arrows-counter-clockwise', 'caret-down'];
+export const UI_ICONS = [
+  'minus',
+  'plus',
+  'download-simple',
+  'arrow-counter-clockwise',
+  'arrows-counter-clockwise',
+  'caret-down',
+  // The row of "more about this wheel" icons under the tool, and the app steps.
+  'info',
+  'list-numbers',
+  'chart-pie-slice',
+  'question',
+  'device-mobile',
+  'export',
+  'plus-square',
+  'dots-three-vertical',
+];
 
 export const DEFAULT_WHEEL_ID = WHEELS[0].id;
 

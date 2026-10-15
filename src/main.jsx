@@ -12,6 +12,12 @@ import './styles.css';
 // Each wheel's colours, from config.js (see vite.config.js).
 import 'virtual:wheel-colours.css';
 import App from './App.jsx';
+import { listenForInstall, registerOfflineHelper } from './pwa.js';
+
+// As an app on the home screen: catch the browser's install offer before
+// anything is drawn, and keep the site's files for use without the internet.
+listenForInstall();
+registerOfflineHelper();
 
 // The page arrives already drawn (scripts/prerender.mjs) for search engines;
 // this draws it afresh with the visitor's own saved scores.

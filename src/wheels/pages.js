@@ -83,6 +83,10 @@ const SHARED_FAQ = [
     q: 'How often should I fill it in?',
     a: 'Whenever you want a check-in: every few weeks or months, or at a turning point. Comparing your wheels over time shows what has shifted.',
   },
+  {
+    q: 'Can I use the {wheel} as an app on my phone?',
+    a: 'Yes, for free. Open this page on your phone and tap Get the app near the bottom: on Android it usually installs in one tap, and on iPhone or iPad you add it from the Share menu. It then opens from your home screen like any other app and works without the internet, and your scores stay on your phone.',
+  },
 ];
 
 const STEPS = [
