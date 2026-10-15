@@ -1,6 +1,7 @@
 /* NeuroDapt Wheels — one layout that adapts to its space.
-   The header carries the logo, the wheel's name and the wheel picker (on a
-   phone held upright the picker gets its own thin row under the name).
+   The header carries the logo, the wheel's name (in the middle of the
+   screen) and the wheel picker (on a phone held upright the picker gets its
+   own thin row under the name).
    Phones and upright tablets: one column, with the wheel sized so that it and
    every area's score fit on the first screen together.
    Wide screens, and phones held sideways: the wheel on the left (kept in view
@@ -22,7 +23,7 @@
   --gutter: 16px;
   /* The header's full height at each layout. Keep in step with the header
      rules below: the wheel's size is worked out from it. */
-  --header-total: 97px;
+  --header-total: 105px;
   /* One score row: a 32px button plus 2px above and below, plus its line. */
   --row-h: 37px;
   color-scheme: light;
@@ -120,16 +121,19 @@ p {
 
 /* ── Header: logo, title, wheel picker ───────────────────────────────────── */
 
+/* The title is in the middle of the screen. The two outer columns share the
+   room left beside it equally; when a long title leaves less room than the
+   logo needs, the logo keeps its width and the title moves over beside it. */
 .site-header {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: 1fr auto minmax(0, 1fr);
   grid-template-areas:
-    'brand title'
-    'picker picker';
+    'brand title .'
+    'picker picker picker';
   align-items: center;
   column-gap: 12px;
-  row-gap: 6px;
-  padding: 6px var(--gutter) 8px;
+  row-gap: 12px;
+  padding: 6px var(--gutter) 10px;
   padding-left: max(var(--gutter), env(safe-area-inset-left));
   padding-right: max(var(--gutter), env(safe-area-inset-right));
   border-bottom: 1px solid var(--line);
@@ -137,6 +141,7 @@ p {
 
 .brand {
   grid-area: brand;
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   min-height: 40px;
@@ -149,13 +154,13 @@ p {
   width: auto;
 }
 
-/* The wheel's name fills the header beside the logo: sized so the longest
-   ("Wheel of Relationships") fits on one line on any phone. */
+/* The wheel's name, large: sized so the longest ("Wheel of Relationships")
+   fits on one line beside the logo on any phone. */
 .site-title {
   grid-area: title;
+  justify-self: center;
   min-width: 0;
-  padding-left: 12px;
-  border-left: 1px solid var(--line);
+  text-align: center;
   font-family: var(--serif);
   font-weight: 400;
   font-size: clamp(1.2rem, 0.3rem + 5vw, 1.9rem);
@@ -179,8 +184,6 @@ p {
 .picker button {
   flex: 1 1 auto;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
   min-height: 28px;
   padding: 0 12px;
   border: 0;
@@ -205,6 +208,30 @@ p {
   .picker button:not([aria-pressed='true']):hover {
     color: var(--text);
   }
+}
+
+/* Words beside or inside a button sit in its true middle. Their box is
+   trimmed to the top of the capital letters and the baseline before it is
+   centred. Without this, Tajawal's own spacing lifts them 2-4px on Apple and
+   Android devices (measured; on Windows it happens to be centred). Browsers
+   without text-box show them as before. */
+.btn-text,
+.score-name,
+.score-value {
+  text-box: trim-both cap alphabetic;
+}
+
+.btn-text {
+  display: block;
+}
+
+/* A label too long for its tab ends in "…". The clipping box gets equal room
+   above and below, so tall letters and "p" are not cut and the middle stays
+   put. */
+.picker .btn-text {
+  padding-block: 0.3em;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Hint ────────────────────────────────────────────────────────────────── */
@@ -419,9 +446,26 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
-/* A very narrow scores column (a phone held sideways): the buttons go under
-   the name, so long names like "Responsibilities" are not split mid-word. */
-@container (max-width: 290px) {
+/* A narrow scores column (the narrowest phones, some phones held sideways):
+   tighter spacing in the rows, so a long word like "Responsibilities" (102px)
+   still fits beside the buttons. Measured: a 292px column split it without
+   this. Wide screens never get here: their scores column is at least 300px. */
+@container (max-width: 299px) {
+  .score-row {
+    column-gap: 4px;
+  }
+
+  .area {
+    gap: 8px;
+  }
+
+  .score-value {
+    min-width: 2.8em;
+  }
+}
+
+/* Narrower still: the buttons go under the name. */
+@container (max-width: 284px) {
   .score-row {
     grid-template-columns: minmax(0, 1fr);
     row-gap: 2px;
@@ -603,23 +647,11 @@ p {
   }
 }
 
-/* The narrowest phones: tighter spacing in the score rows, so a long word
-   like "Responsibilities" still fits beside the buttons. */
+/* The narrowest phones: a smaller margin (the score rows tighten up on their
+   own, see "A narrow scores column"). */
 @media (max-width: 359px) {
   :root {
     --gutter: 12px;
-  }
-
-  .score-row {
-    column-gap: 4px;
-  }
-
-  .area {
-    gap: 8px;
-  }
-
-  .score-value {
-    min-width: 2.8em;
   }
 }
 
@@ -630,11 +662,22 @@ p {
     --header-total: 77px;
   }
 
+  /* The title in the middle of the screen, as on phones: the logo's and the
+     picker's columns share the room beside it equally. Where a long title
+     leaves less room than the picker needs (measured: "Wheel of
+     Relationships" below 800px wide), the picker keeps its width and the
+     title moves a little toward the logo. */
   .site-header {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: 1fr auto 1fr;
     grid-template-areas: 'brand title picker';
-    column-gap: 16px;
+    column-gap: 24px;
     padding-block: 10px;
+  }
+
+  .picker {
+    justify-self: end;
+    /* The picker's column is never narrower than the picker. */
+    min-width: auto;
   }
 
   /* A bigger logo on tablets and computers. */
@@ -647,7 +690,6 @@ p {
   }
 
   .site-title {
-    padding-left: 16px;
     font-size: clamp(1.5rem, 0.9rem + 1.4vw, 2.2rem);
   }
 
@@ -687,6 +729,25 @@ p {
 
   .hint {
     text-align: left;
+  }
+}
+
+/* "Summary" over the scores, on wide screens only: there the scores have
+   their own column beside the wheel. (Phones held sideways leave it off.) */
+@media (min-width: 960px) {
+  .scores-title.visually-hidden {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0 0 8px;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    color: #3b4245;
   }
 }
 

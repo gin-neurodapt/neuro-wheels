@@ -64,7 +64,7 @@ export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAl
         </div>
         <button type="button" className="btn btn-primary" onClick={download} disabled={busy}>
           <Icon name="download-simple" size={20} />
-          {busy ? 'Preparing image…' : 'Download image'}
+          <span className="btn-text">{busy ? 'Preparing image…' : 'Download image'}</span>
         </button>
         <p className="status" role="status" aria-live="polite">
           {status}
@@ -73,11 +73,11 @@ export function Actions({ wheel, levels, label, onLabel, onResetWheel, onResetAl
       <div className="actions-row">
         <button type="button" className="btn btn-reset-wheel" onClick={resetWheel}>
           <Icon name="arrow-counter-clockwise" size={18} />
-          Reset this wheel
+          <span className="btn-text">Reset this wheel</span>
         </button>
         <button type="button" className="btn btn-reset-all" onClick={resetAll}>
           <Icon name="arrows-counter-clockwise" size={18} />
-          Reset all wheels
+          <span className="btn-text">Reset all wheels</span>
         </button>
       </div>
     </div>

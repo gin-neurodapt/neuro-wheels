@@ -9,7 +9,7 @@ export function WheelPicker({ wheels, activeId, onChoose }) {
           onClick={() => onChoose(w.id)}
           style={{ '--tab-ink': w.ink }}
         >
-          {w.tab}
+          <span className="btn-text">{w.tab}</span>
         </button>
       ))}
     </div>

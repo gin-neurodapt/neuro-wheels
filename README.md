@@ -7,13 +7,16 @@ computer can download the result as an image.
 
 - **No average, on purpose.** The aim is an even wheel, not a full one: the
   page shows how uneven the areas are, never an overall score to push up.
-- **Works on every screen.** The header carries the logo, the wheel's name and
-  the wheel picker. On phones the wheel is sized so that it and every area's
-  score fit on the first screen together. The wheel and its labels are one
-  scalable drawing, so nothing is positioned per device: wide screens show
-  the names around the wheel, phones show icons and percentages (or icons
-  alone when the wheel is small), with the names in the list underneath.
-  Buttons are the same size on every device.
+- **Works on every screen.** The header carries the logo, the wheel's name
+  (centred on the screen) and the wheel picker. On phones the wheel is sized
+  so that it and every area's score fit on the first screen together. The
+  wheel and its labels are one scalable drawing, so nothing is positioned per
+  device: wide screens show the names around the wheel, phones show icons and
+  percentages (or icons alone when the wheel is small), with the names in the
+  list underneath. On wide screens the scores are headed "Summary"; phones
+  leave the heading off. Buttons are the same size on every device, and their
+  words sit in the true middle on every device (`text-box` in `styles.css`;
+  without it the font lifts them 2-4px on Apple and Android).
 - **Descriptions.** Tapping an area's name (or its icon on the wheel) opens a
   short description under it. With a mouse, pointing at an area's icon, name
   or percentage shows it in a small card instead.

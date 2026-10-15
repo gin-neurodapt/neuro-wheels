@@ -162,6 +162,21 @@ describe('the wheel page', () => {
     expect(document.body.textContent).not.toMatch(/average/i);
   });
 
+  it('heads the scores "Summary", hidden on phones (styles.css shows it on wide screens)', () => {
+    render(<App />);
+    const heading = screen.getByRole('heading', { level: 2, name: 'Summary' });
+    expect(heading.classList.contains('visually-hidden')).toBe(true);
+    expect(screen.getByRole('region', { name: 'Summary' }).querySelector('.score-list')).not.toBe(null);
+  });
+
+  it('puts every button’s words in .btn-text, the box styles.css centres', () => {
+    render(<App />);
+    const picker = screen.getByRole('group', { name: 'Choose a wheel' });
+    const buttons = [...picker.querySelectorAll('button'), ...document.querySelectorAll('.btn')];
+    expect(buttons.length).toBe(6);
+    for (const b of buttons) expect(b.querySelector('.btn-text')?.textContent).toBe(b.textContent);
+  });
+
   it('opens an area’s description when its name is tapped, one at a time', () => {
     render(<App />);
     const family = screen.getByRole('button', { name: 'Family' });

@@ -41,12 +41,13 @@ export function ScoreList({ wheel, levels, onStep, openArea = null, onAbout, onP
   const listRef = useRef(null);
   const announcement = useAnnouncement(wheel, levels);
   useRevealOpenArea(listRef, openArea);
-  // No heading on screen (the list explains itself), but screen readers
-  // still get one to jump to.
+  // "Summary" shows on wide screens, where the scores have their own column
+  // beside the wheel (styles.css). On phones the list sits right under the
+  // wheel, so there the heading is for screen readers only.
   return (
     <section className="scores" aria-labelledby={headingId}>
-      <h2 className="visually-hidden" id={headingId}>
-        Your scores
+      <h2 className="scores-title visually-hidden" id={headingId}>
+        Summary
       </h2>
       <ol className="score-list" ref={listRef}>
         {wheel.slices.map((slice, i) => {
