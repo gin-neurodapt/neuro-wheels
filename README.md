@@ -1,7 +1,8 @@
 # NeuroDapt Wheels
 
-The Wheel of Life, Wheel of Relationships and Wheel of Business as one free,
-public page. A visitor scores each of 8 areas from 0 to 100% by tapping the
+The Wheel of Life, Wheel of Relationships and Wheel of Business as free,
+public pages, one per wheel: `/` (Wheel of Life), `/wheel-of-relationships`
+and `/wheel-of-business`. A visitor scores each of 8 areas from 0 to 100% by tapping the
 wheel (or with the + and − buttons), can read what each area covers, and on a
 computer can download the result as an image.
 
@@ -29,6 +30,14 @@ computer can download the result as an image.
   analytics, and loads nothing from any other website.
 - **Standalone.** A static site with no login and no connection to the
   clinic app.
+- **Found by search engines and AI assistants.** Each wheel's page is built
+  ahead of time with its whole content in the HTML (most AI crawlers do not
+  run JavaScript), its own title, description, canonical address,
+  link-preview tags and schema.org data (WebApplication, FAQPage, the
+  organisation and its author). Under the wheel, each page says what the
+  wheel is, how to use it, its areas and common questions. The site also
+  has `sitemap.xml`, `robots.txt` (pointing to it), `llms.txt` (a plain
+  summary for AI assistants) and a real 404 page.
 
 ## Working on it
 
@@ -38,7 +47,8 @@ Needs Node 22.12 or newer (`.nvmrc` says 24).
 npm install
 npm run dev       # http://localhost:5173, reloads as you edit
 npm test          # the tests
-npm run build     # the site, ready to publish, in dist/
+npm run build     # the site, ready to publish, in dist/ (builds the app, then
+                  # each wheel's page with scripts/prerender.mjs)
 npm run preview   # serve dist/ locally to check the build
 ```
 
@@ -55,34 +65,48 @@ Everything about the wheels lives in `src/wheels/config.js`:
   That copies the icon's drawing into `src/wheels/icons.generated.js`. A test
   fails if you forget.
 - **Add a wheel:** add an entry to `WHEELS` with an `id`, a `title`, a short
-  `tab` label, colours and 8 slices. It appears in the picker and gets its
-  own link (`/#<id>`). `ink` is the text colour; a test checks it is
-  readable on white.
+  `tab` label, colours and 8 slices, and its page to `PAGES` in
+  `src/wheels/pages.js`. It appears in the picker and gets its own page.
+  `ink` is the text colour; a test checks it is readable on white.
 - **Colours:** `fill` paints scored rings, `stroke` draws the outer rim (the
   lines inside it are a much lighter version of it, set by
   `INNER_LINE_FADE` in `src/wheels/colour.js`), `ink` is used for text,
   buttons and the score outlines.
 
-Links can open a particular wheel directly: `/#life`, `/#relationships`,
-`/#business`.
+**Change a page's search title, description or "about" text:** edit
+`src/wheels/pages.js` (keep descriptions to about 150 characters; a test
+checks). The same text feeds the page, its schema.org data and `llms.txt`.
+
+Each wheel has its own address: `/`, `/wheel-of-relationships`,
+`/wheel-of-business`. Short ones redirect there (`/life`, `/relationships`,
+`/business`, `/wheel-of-life`; see `public/_redirects`), and older links
+such as `/#business` still work. The home page opens the wheel last used on
+that device.
 
 ## Where things are
 
 | Path | What it does |
 | --- | --- |
-| `src/App.jsx` | Page layout, scores, remembering them, the `#wheel` link |
+| `src/App.jsx` | Page layout, scores, remembering them, the wheel's address |
+| `src/wheels/pages.js` | Each wheel's page: address, search title and description, "about" text and questions |
+| `src/wheels/seo.js` | Builds each page's head tags, schema.org data, `sitemap.xml` and `llms.txt` (build time only) |
+| `src/entry-server.jsx`, `scripts/prerender.mjs` | Build each wheel's page ahead of time, plus `404.html` |
+| `src/components/AboutWheel.jsx` | Under the wheel: what it is, how to use it, its areas, questions, the other wheels |
+| `src/components/SiteFooter.jsx` | The footer, with the large logo linking to neurodapt.au |
 | `src/components/WheelChart.jsx` | The interactive wheel (SVG) |
 | `src/components/ScoreList.jsx` | The list of areas with + and − buttons; tapping a name opens its description |
 | `src/components/AreaCard.jsx` | The description card shown while a mouse points at an area |
 | `src/components/Actions.jsx` | Image name and Download (computers only), Reset this wheel / Reset all wheels |
 | `src/wheels/geometry.js` | Wheel shapes, label positions, and which label style fits (shared by the page and the image) |
-| `src/wheels/colour.js` | The light inner lines and dark rim |
+| `src/wheels/colour.js` | The light inner lines and dark rim; each wheel's colours as CSS (`vite.config.js` serves it) |
 | `src/wheels/exportImage.js` | Draws the downloadable PNG and downloads it |
 | `src/wheels/storage.js` | Saving and safely re-reading scores |
 | `src/styles.css` | All styling; one-column on phones, two columns on wide screens and sideways phones. `--header-total` must match the header's real height (the phone wheel is sized from it) |
 | `public/_headers` | Security headers (Cloudflare Pages) |
+| `public/_redirects` | Short and older addresses for the wheels' pages |
+| `public/robots.txt` | Lets every crawler in and points to the sitemap |
 | `src/assets/logo.svg` | The NeuroDapt logo: the page header, the downloaded image, and the source of every picture below |
-| `public/og-image.png` | The picture shown when the link is shared (WhatsApp, Messages, Facebook…), set in `index.html` |
+| `public/og-image.png` | The picture shown when the link is shared (WhatsApp, Messages, Facebook…), set for every page in `src/wheels/seo.js` |
 | `public/favicon.svg`, `favicon.ico` | Browser-tab icon: the logo's mountain, with heavier lines so it shows at 16px |
 | `public/apple-touch-icon.png`, `icon-*.png` | Home-screen and install icons: the full logo |
 
@@ -114,6 +138,14 @@ requests), `nosniff`, a referrer policy, a permissions policy that turns off
 camera/microphone/location, and long-term caching for the hashed files in
 `/assets/`. Embedding in a frame is allowed only from `neurodapt.au` and its
 subdomains. Change `frame-ancestors` to `'none'` to forbid embedding.
+Each page's schema.org data is an inline JSON block: browsers never run it,
+so the policy does not block it. The built pages carry no inline `style=""`
+(`seo.js` strips the few the app sets; the browser sets them again).
+
+**Search engines.** The sitemap is `https://wheels.neurodapt.au/sitemap.xml`.
+Submit it in Google Search Console and in Bing Webmaster Tools (Bing's index
+also feeds ChatGPT search and Copilot). Cloudflare's AI crawler settings for
+the `neurodapt.au` zone decide which AI crawlers may read the site.
 
 **Cloudflare features that inject scripts conflict with this policy.** The
 policy blocks any script it did not ship with, so for this subdomain keep

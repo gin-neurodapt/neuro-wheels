@@ -68,7 +68,9 @@ describe('the wheel page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Business' }));
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
     expect(rowValue('Profit Margin')).toBe('0%');
-    expect(window.location.hash).toBe('#business');
+    expect(window.location.pathname).toBe('/wheel-of-business');
+    expect(window.location.hash).toBe('');
+    expect(document.title).toBe('Wheel of Business: Free Interactive Assessment | NeuroDapt');
     fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Family')).toBe('80%');
   });
@@ -82,8 +84,26 @@ describe('the wheel page', () => {
 
     render(<App />);
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
+    expect(window.location.pathname).toBe('/wheel-of-business');
     fireEvent.click(screen.getByRole('button', { name: 'Life' }));
     expect(rowValue('Purpose')).toBe('100%');
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('opens the wheel whose page this is, whatever was used last', () => {
+    window.localStorage.setItem('neurodapt-wheels:v2:active', 'business');
+    window.history.replaceState(null, '', '/wheel-of-relationships');
+    render(<App />);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Relationships');
+    expect(window.location.pathname).toBe('/wheel-of-relationships');
+  });
+
+  it('moves an older #link to the wheel’s own page', () => {
+    window.history.replaceState(null, '', '/#business');
+    render(<App />);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
+    expect(window.location.pathname).toBe('/wheel-of-business');
+    expect(window.location.hash).toBe('');
   });
 
   it('opens the wheel named in the address', () => {
@@ -167,6 +187,47 @@ describe('the wheel page', () => {
     const heading = screen.getByRole('heading', { level: 2, name: 'Summary' });
     expect(heading.classList.contains('visually-hidden')).toBe(true);
     expect(screen.getByRole('region', { name: 'Summary' }).querySelector('.score-list')).not.toBe(null);
+  });
+
+  it('says what the wheel is, how to use it, its areas and common questions', () => {
+    window.history.replaceState(null, '', '/wheel-of-business');
+    render(<App />);
+    const about = screen.getByRole('region', { name: 'What is the Wheel of Business?' });
+    for (const name of ['How to use it', 'The 8 areas of the Wheel of Business', 'Common questions']) {
+      expect(within(about).getByRole('heading', { level: 2, name })).toBeTruthy();
+    }
+    const areas = about.querySelector('dl');
+    for (const area of ['Profit Margin', 'Innovation']) expect(within(areas).getByText(area)).toBeTruthy();
+    expect(within(about).getByRole('heading', { level: 3, name: 'Should I aim for 100% in every area?' })).toBeTruthy();
+  });
+
+  it('links to the other wheels’ pages, and a click switches to one here', () => {
+    render(<App />);
+    const more = screen.getByRole('navigation', { name: 'The other wheels' });
+    const link = within(more).getByRole('link', { name: 'Wheel of Business' });
+    expect(link.getAttribute('href')).toBe('/wheel-of-business');
+    expect(within(more).queryByRole('link', { name: 'Wheel of Life' })).toBe(null);
+    window.scrollTo = vi.fn();
+    fireEvent.click(link);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Wheel of Business');
+    expect(window.location.pathname).toBe('/wheel-of-business');
+    expect(window.scrollTo).toHaveBeenCalled();
+  });
+
+  it('shows the NeuroDapt logo in the footer, linking to the website', () => {
+    render(<App />);
+    const link = within(screen.getByRole('contentinfo')).getByRole('link', { name: 'Visit neurodapt.au' });
+    expect(link.getAttribute('href')).toBe('https://www.neurodapt.au/');
+    expect(link.querySelector('img')).not.toBe(null);
+  });
+
+  it('colours the page and tabs through data attributes, not inline styles', () => {
+    const { container } = render(<App />);
+    expect(container.querySelector('.page').getAttribute('data-wheel')).toBe('life');
+    expect(container.querySelector('.page').getAttribute('style')).toBe(null);
+    const tabs = [...screen.getByRole('group', { name: 'Choose a wheel' }).querySelectorAll('button')];
+    expect(tabs.map((t) => t.getAttribute('data-tab'))).toEqual(['life', 'relationships', 'business']);
+    expect(tabs.every((t) => t.getAttribute('style') === null)).toBe(true);
   });
 
   it('puts every button’s words in .btn-text, the box styles.css centres', () => {

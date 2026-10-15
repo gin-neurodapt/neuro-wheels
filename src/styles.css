@@ -119,6 +119,136 @@ p {
   margin-top: 8px;
 }
 
+/* The NeuroDapt logo, large, linking to the main website. */
+.footer-brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer-brand img {
+  display: block;
+  height: 88px;
+  width: auto;
+}
+
+@media (min-width: 720px) {
+  .footer-brand img {
+    height: 112px;
+  }
+}
+
+/* ── About this wheel (under the tool) ───────────────────────────────────── */
+
+.about-wheel {
+  border-top: 1px solid var(--line);
+  padding: 36px var(--gutter) 44px;
+  padding-left: max(var(--gutter), env(safe-area-inset-left));
+  padding-right: max(var(--gutter), env(safe-area-inset-right));
+}
+
+.about-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.about-inner h2 {
+  margin: 36px 0 10px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #3b4245;
+}
+
+.about-inner > h2:first-child {
+  margin-top: 0;
+}
+
+.about-inner p + p {
+  margin-top: 10px;
+}
+
+.about-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.about-areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px 28px;
+  margin: 0;
+}
+
+.about-areas dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.about-areas dd {
+  margin: 2px 0 0;
+}
+
+.about-faq h3 {
+  margin: 18px 0 4px;
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.about-faq > div:first-child h3 {
+  margin-top: 0;
+}
+
+.about-more ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-more a,
+.not-found a {
+  color: var(--accent);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.about-more span {
+  display: block;
+}
+
+/* The page for an address that does not exist (404.html). */
+.not-found {
+  flex: 1;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 36px var(--gutter) 48px;
+}
+
+.not-found ul {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding-left: 1.2em;
+}
+
 /* ── Header: logo, title, wheel picker ───────────────────────────────────── */
 
 /* The title is in the middle of the screen. The two outer columns share the
@@ -242,6 +372,13 @@ p {
   font-size: 0.88rem;
   line-height: 1.35;
   text-align: center;
+}
+
+/* The hint shows above the wheel, except on wide screens, where it moves
+   under "Summary" (see there). One place shows at a time, and display: none
+   keeps screen readers from reading it twice. */
+.hint-summary {
+  display: none;
 }
 
 /* "Tap" on touch screens, "Click" elsewhere (the same test as the download). */
@@ -689,8 +826,10 @@ p {
     height: 56px;
   }
 
+  /* Up to 3rem on computers: its line (1.15 x 48px) still fits beside the
+     56px logo, so the header keeps its height. */
   .site-title {
-    font-size: clamp(1.5rem, 0.9rem + 1.4vw, 2.2rem);
+    font-size: clamp(1.5rem, 0.5rem + 2.6vw, 3rem);
   }
 
   .picker button {
@@ -732,22 +871,44 @@ p {
   }
 }
 
-/* "Summary" over the scores, on wide screens only: there the scores have
-   their own column beside the wheel. (Phones held sideways leave it off.) */
+/* Wide screens only (phones held sideways leave these off): the scores
+   column is headed "Summary" with the hint under it, and its rows are spaced
+   out, since the wheel beside it is tall. */
 @media (min-width: 960px) {
+  .main {
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'chart scores'
+      'chart actions';
+    row-gap: 24px;
+  }
+
   .scores-title.visually-hidden {
     position: static;
     width: auto;
     height: auto;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
     overflow: visible;
     clip: auto;
     white-space: normal;
     font-family: var(--serif);
     font-weight: 400;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     line-height: 1.2;
     color: #3b4245;
+  }
+
+  .hint-top {
+    display: none;
+  }
+
+  .hint-summary {
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .score-row {
+    padding-block: 7px;
   }
 }
 
@@ -828,7 +989,9 @@ p {
   .picker,
   .hint,
   .area-caret,
-  .area-card {
+  .area-card,
+  .about-wheel,
+  .footer-brand {
     display: none;
   }
 }

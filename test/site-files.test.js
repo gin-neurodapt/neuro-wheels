@@ -8,7 +8,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public/manifest.webmanifest'), 'utf8'));
 
 const publicFile = (urlPath) => path.join(root, 'public', urlPath);
-const meta = (key) => html.match(new RegExp(`<meta (?:property|name)="${key}" content="([^"]*)"`))?.[1];
+// The link-preview picture is tested with each page's head (seo.test.jsx).
 
 function pngSize(file) {
   const b = fs.readFileSync(file);
@@ -33,12 +33,4 @@ describe('the files the page points to', () => {
     }
   });
 
-  it('has the link-preview picture, at a full address and the size the page declares', () => {
-    const image = meta('og:image');
-    // Apps that build link previews need the full address, not /og-image.png.
-    expect(image).toMatch(/^https:\/\//);
-    expect(new URL(image).origin).toBe(new URL(meta('og:url')).origin);
-    const declared = [Number(meta('og:image:width')), Number(meta('og:image:height'))];
-    expect(pngSize(publicFile(new URL(image).pathname))).toEqual(declared);
-  });
 });

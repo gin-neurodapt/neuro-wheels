@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icon } from './Icon.jsx';
+import { Hint } from './Hint.jsx';
 import { LEVELS } from '../wheels/config.js';
 import { toPercent } from '../wheels/scores.js';
 
@@ -41,14 +42,16 @@ export function ScoreList({ wheel, levels, onStep, openArea = null, onAbout, onP
   const listRef = useRef(null);
   const announcement = useAnnouncement(wheel, levels);
   useRevealOpenArea(listRef, openArea);
-  // "Summary" shows on wide screens, where the scores have their own column
-  // beside the wheel (styles.css). On phones the list sits right under the
-  // wheel, so there the heading is for screen readers only.
+  // "Summary", with the how-to hint under it, shows on wide screens, where the
+  // scores have their own column beside the wheel (styles.css). On phones the
+  // list sits right under the wheel: the heading is for screen readers only,
+  // and the hint shows above the wheel instead.
   return (
     <section className="scores" aria-labelledby={headingId}>
       <h2 className="scores-title visually-hidden" id={headingId}>
         Summary
       </h2>
+      <Hint place="summary" />
       <ol className="score-list" ref={listRef}>
         {wheel.slices.map((slice, i) => {
           const level = levels[i];

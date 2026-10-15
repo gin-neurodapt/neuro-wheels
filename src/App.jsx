@@ -8,6 +8,10 @@ import { WheelChart } from './components/WheelChart.jsx';
 import { ScoreList } from './components/ScoreList.jsx';
 import { Actions } from './components/Actions.jsx';
 import { AreaCard, usePeek } from './components/AreaCard.jsx';
+import { Hint } from './components/Hint.jsx';
+import { AboutWheel } from './components/AboutWheel.jsx';
+import { SiteFooter } from './components/SiteFooter.jsx';
+import { pageFor, wheelFromPath } from './wheels/pages.js';
 
 function deviceStorage() {
   try {
@@ -17,26 +21,33 @@ function deviceStorage() {
   }
 }
 
+// An address that names a wheel opens it: its own page (/wheel-of-business)
+// or an older link (/#business). The home page opens the wheel last used on
+// this device, or the Wheel of Life.
 function startingState() {
   const state = loadState(deviceStorage());
-  const fromLink = wheelFromHash(window.location.hash);
+  const fromLink = wheelFromHash(window.location.hash) || wheelFromPath(window.location.pathname);
   return fromLink ? { ...state, active: fromLink } : state;
 }
 
-export default function App() {
-  const [state, setState] = useState(startingState);
+// `start` is given when the pages are built ahead of time (entry-server.jsx):
+// there is no browser then, and nothing saved.
+export default function App({ start }) {
+  const [state, setState] = useState(() => start ?? startingState());
   const wheel = findWheel(state.active) || WHEELS[0];
   const levels = state.scores[wheel.id];
 
   useEffect(() => saveState(deviceStorage(), state), [state]);
 
-  // Keep the address showing the open wheel (#life, #relationships,
-  // #business) without adding history entries, and follow it if it changes.
+  // Keep the address on the open wheel's own page (/, /wheel-of-relationships,
+  // /wheel-of-business) without adding history entries, and follow an older
+  // #link if one is opened.
   useEffect(() => {
-    const hash = `#${wheel.id}`;
-    if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
-    document.title = `${wheel.title} · NeuroDapt`;
-  }, [wheel.id, wheel.title]);
+    const page = pageFor(wheel.id);
+    const { pathname, search, hash } = window.location;
+    if (pathname !== page.path || hash) window.history.replaceState(null, '', page.path + search);
+    document.title = page.title;
+  }, [wheel.id]);
 
   useEffect(() => {
     const onHash = () => {
@@ -99,10 +110,7 @@ export default function App() {
   const anyScores = Object.values(state.scores).some((l) => l.some(Boolean));
 
   return (
-    <div
-      className="page"
-      style={{ '--accent': wheel.ink, '--accent-fill': wheel.fill, '--rows': wheel.slices.length }}
-    >
+    <div className="page" data-wheel={wheel.id}>
       <header className="site-header">
         <a className="brand" href="https://www.neurodapt.au/" target="_top" rel="noopener">
           <img src={logoUrl} alt="NeuroDapt" width="115" height="79" />
@@ -112,12 +120,7 @@ export default function App() {
       </header>
 
       <main className="main">
-        <p className="hint">
-          <span className="on-touch">Tap a ring to score an area, and tap it again to clear it.</span>
-          <span className="on-mouse">
-            Click a ring to score an area, and click it again to clear it. Point at an area to read about it.
-          </span>
-        </p>
+        <Hint place="top" />
 
         <WheelChart wheel={wheel} levels={levels} onTap={onTap} onAbout={onAbout} onPeek={onPeek} />
 
@@ -142,15 +145,11 @@ export default function App() {
         />
       </main>
 
+      <AboutWheel wheel={wheel} onChoose={onChoose} />
+
       <AreaCard wheel={wheel} peek={card} />
 
-      <footer className="site-footer">
-        <p>Your scores stay on this device. Nothing is sent anywhere.</p>
-        <p>
-          Developed by Gin Maher, Clinical Hypnotherapist and Strategic Psychotherapist, Sydney.
-          <br />© {new Date().getFullYear()} NeuroDapt. All rights reserved.
-        </p>
-      </footer>
+      <SiteFooter logoUrl={logoUrl} />
     </div>
   );
 }

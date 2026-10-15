@@ -15,3 +15,18 @@ export function fadeToWhite(hex, amount) {
 export function innerLineColour(wheel) {
   return fadeToWhite(wheel.stroke, INNER_LINE_FADE);
 }
+
+// Each wheel's colours as CSS, keyed by the page's data-wheel attribute and
+// each picker tab's data-tab (vite.config.js serves it to the page as
+// "virtual:wheel-colours.css"). A stylesheet rather than inline styles: the
+// pages are built ahead of time, and the security policy forbids inline
+// style="" in them.
+export function wheelColoursCss(wheels) {
+  return wheels
+    .map(
+      (w) =>
+        `.page[data-wheel="${w.id}"] { --accent: ${w.ink}; --accent-fill: ${w.fill}; --rows: ${w.slices.length}; }\n` +
+        `.picker [data-tab="${w.id}"] { --tab-ink: ${w.ink}; }`,
+    )
+    .join('\n');
+}

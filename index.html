@@ -5,28 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#177082" />
+    <!-- Each page's title, description, link-preview tags and schema.org data
+         are written here when the site is built (scripts/prerender.mjs,
+         src/wheels/seo.js). The title below is only for `npm run dev`. -->
+    <!-- page-head -->
     <title>Wheel of Life · NeuroDapt</title>
-    <meta
-      name="description"
-      content="A free, interactive Wheel of Life, Wheel of Relationships and Wheel of Business from NeuroDapt. Score each area, see where things are out of balance, and save your wheel as an image. Your scores stay on your device."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="NeuroDapt" />
-    <meta property="og:title" content="NeuroDapt Wheels: Life, Relationships and Business" />
-    <meta
-      property="og:description"
-      content="Score each area of your life, relationship or business and see where it is out of balance."
-    />
-    <!-- The picture shown when the link is shared (WhatsApp, Messages,
-         Facebook…). Apps fetch it from the live address, so it is written in
-         full; change it if the site moves to another address. -->
-    <meta property="og:url" content="https://wheels.neurodapt.au/" />
-    <meta property="og:image" content="https://wheels.neurodapt.au/og-image.png" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="NeuroDapt" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <!-- /page-head -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
@@ -34,7 +18,7 @@
     <link rel="manifest" href="/manifest.webmanifest" />
   </head>
   <body>
-    <noscript>This page needs JavaScript turned on to draw the wheel.</noscript>
+    <noscript>Scoring the wheel needs JavaScript turned on.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

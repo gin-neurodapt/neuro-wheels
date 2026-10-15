@@ -11,3 +11,6 @@
 .DS_Store
 .env*.local
 npm-debug.log*
+
+# server build used only while building the pages
+/dist-ssr
