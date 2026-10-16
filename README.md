@@ -7,6 +7,11 @@ wheel (or with the + and − buttons), can read what each area covers, can
 share a picture of the result (email, WhatsApp, Messenger…), and on a computer
 can download it as an image.
 
+- **A score is effort and reward together.** Each area is scored for how
+  much effort the person is putting into it and how rewarded they feel in
+  it, not only how they feel about it. The intros, the first "How to use"
+  step, the "How do I decide on a score?" question and `llms.txt` all say so
+  (`src/wheels/pages.js`; a test checks it stays).
 - **No average, on purpose.** The aim is an even wheel, not a full one: the
   page shows how uneven the areas are, never an overall score to push up.
 - **Works on every screen.** The header carries the logo, the wheel's name

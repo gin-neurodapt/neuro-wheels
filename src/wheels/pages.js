@@ -26,7 +26,7 @@ const PAGES = {
     description:
       'Free interactive Wheel of Life. Score 8 areas, from health and career to family and fun, and see where your life is out of balance. No sign-up, fully private.',
     intro: [
-      'The Wheel of Life is a simple coaching tool for seeing how balanced your life feels right now. It splits life into eight areas, and you score each one from 0 to 100%.',
+      'The Wheel of Life is a simple coaching tool for seeing how balanced your life is right now. It splits life into eight areas, and you score each one from 0 to 100% for how much effort you are putting into it and how rewarded you feel in it.',
       'The shape it makes shows at a glance which areas are going well and which need more attention, so you can decide where to put your energy first.',
     ],
     faq: [],
@@ -37,8 +37,8 @@ const PAGES = {
     description:
       'Free interactive relationship wheel. Score trust, love, fun, intimacy and more, and see where your relationship is uneven. No sign-up; your scores stay private.',
     intro: [
-      'The Wheel of Relationships (a relationship wheel) applies the Wheel of Life idea to a couple. You score eight areas of your relationship from 0 to 100%, from trust and vulnerability to fun and intimacy.',
-      'The shape shows where the relationship feels strong and where it needs care, which makes it a gentle way to start a conversation with your partner.',
+      'The Wheel of Relationships (a relationship wheel) applies the Wheel of Life idea to a couple. You score eight areas of your relationship from 0 to 100%, from trust and vulnerability to fun and intimacy, for how much effort you are putting into each one and how rewarded you feel in it.',
+      'The shape shows where the relationship is strong and where it needs care, which makes it a gentle way to start a conversation with your partner.',
     ],
     faq: [
       {
@@ -53,7 +53,7 @@ const PAGES = {
     description:
       'Free interactive Wheel of Business. Score profit, sales, marketing, clients, team and more, and see where your business is out of balance. No sign-up needed.',
     intro: [
-      'The Wheel of Business is a quick health check for a business. You score eight areas from 0 to 100%, from profit margin and sales to integrity and innovation.',
+      'The Wheel of Business is a quick health check for a business. You score eight areas from 0 to 100%, from profit margin and sales to integrity and innovation, for how much effort is going into each one and how rewarded you feel by it.',
       'The shape shows where the business is strong and where it is out of balance, so you can see what to work on next.',
     ],
     faq: [
@@ -66,10 +66,15 @@ const PAGES = {
 };
 
 // The same for every wheel ({wheel} becomes its name, {areas} its areas).
+// The first two come before a wheel's own questions, the rest after.
 const SHARED_FAQ = [
   {
     q: 'What areas does the {wheel} cover?',
     a: '{count} areas: {areas}. Tap or click any area on this page to read what it includes.',
+  },
+  {
+    q: 'How do I decide on a score for each area?',
+    a: 'Each score is about two things together: how much effort you are putting into that area, and how rewarded you feel in it. It is not only how you feel about the area. Score it from 0 to 100% by tapping or clicking a ring on the wheel, or with the + and − buttons.',
   },
   {
     q: 'Should I aim for 100% in every area?',
@@ -94,8 +99,8 @@ const SHARED_FAQ = [
 ];
 
 const STEPS = [
-  'Score each area from 0 to 100%: tap or click a ring on the wheel, or use the + and − buttons. Tap or click an area’s name to read what it covers.',
-  'Look at the shape. The aim is an even wheel, not a full one: deep dips are where things feel most out of balance.',
+  'Score each area from 0 to 100% for two things together: how much effort you are putting into it, and how rewarded you feel in it. Tap or click a ring on the wheel, or use the + and − buttons. Tap or click an area’s name to read what it covers.',
+  'Look at the shape. The aim is an even wheel, not a full one: deep dips are the areas most out of balance.',
   'Choose one or two areas to work on first. Come back in a few weeks to see how the shape has changed (Share results sends a picture of your wheel to yourself or anyone you choose, so you can compare).',
 ];
 
@@ -127,7 +132,7 @@ export function pageFor(id) {
     description: page.description,
     intro: page.intro,
     steps: STEPS,
-    faq: [SHARED_FAQ[0], ...page.faq, ...SHARED_FAQ.slice(1)].map(({ q, a }) => ({ q: fill(q, wheel), a: fill(a, wheel) })),
+    faq: [...SHARED_FAQ.slice(0, 2), ...page.faq, ...SHARED_FAQ.slice(2)].map(({ q, a }) => ({ q: fill(q, wheel), a: fill(a, wheel) })),
   };
 }
 

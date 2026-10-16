@@ -50,6 +50,22 @@ describe('each wheel’s own page', () => {
     }
   });
 
+  // A score is effort and reward together, not only a feeling (operator,
+  // 2026-10-16): the intro, the first step and a question all say so.
+  it('explains that each score is the effort put in and how rewarded it feels', () => {
+    const both = /effort[^.]*rewarded/;
+    for (const p of ALL_PAGES) {
+      expect(p.intro.join(' '), p.id).toMatch(both);
+      expect(p.steps[0]).toMatch(both);
+      const how = p.faq[1]; // straight after "What areas…", before a wheel's own questions
+      expect(how.q, p.id).toBe('How do I decide on a score for each area?');
+      expect(how.a).toMatch(both);
+      expect(how.a).toContain('not only how you feel');
+    }
+    // The summary line itself (the pages' own text further down says it too).
+    expect(llmsTxt().split('\n').find((l) => l.startsWith('> '))).toMatch(both);
+  });
+
   it('answers whether the results can be shared', () => {
     for (const p of ALL_PAGES) {
       const share = p.faq.find((f) => f.q === `Can I share my ${p.wheel.title} results?`);
